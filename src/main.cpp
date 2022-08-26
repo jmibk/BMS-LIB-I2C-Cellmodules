@@ -8,7 +8,7 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Demo - Cellmodules over I2C");
  
-  //init can
+  //init i2c
   if (battery.init(13, 16))  //SDA, SCL
     Serial.println("cellmodules initialised");
   else

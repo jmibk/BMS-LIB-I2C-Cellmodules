@@ -172,6 +172,9 @@ void Cellmodules::_calculateCellStateValues(void) {
 
         //celltemperature
         meancelltemperature += _modules_data.celltemperature[address];
+
+        //cellsdeltavoltage
+        _modules_data.batterydeltavoltage = highestcellvoltage - lowestcellvoltage;
         }
 
     //put data into struct (to avoid short outbreaks of values whren reading them)

@@ -43,6 +43,7 @@ class Cellmodules {
         uint8_t get_highestcelltemperaturenumber(void)                      {return _modules_data.highestcelltemperaturenumber;}
         float get_batteryvoltage(void)                                      {return _modules_data.batteryvoltage;}
         float get_meancelltemperature(void)                                 {return _modules_data.meancelltemperature;}
+	float get_batterydeltavoltage(void)                                 {return _modules_data.batterydeltavoltage;}
 
         //module data
         void set_cellbalancecurrentsetpoint(uint8_t address, float value)   {_modules_data.cellbalancecurrentsetpoint[address] = value;}

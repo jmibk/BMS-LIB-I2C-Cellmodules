@@ -46,7 +46,8 @@ class Cellmodules {
 	float get_batterydeltavoltage(void)                                 {return _modules_data.batterydeltavoltage;}
 
         //module data
-        void set_cellbalancecurrentsetpoint(uint8_t address, float value)   {_modules_data.cellbalancecurrentsetpoint[address] = value;}
+        void set_cellbalancecurrentsetpoint(float value);                   //set balacing current to all modules
+        void set_cellbalancecurrentsetpointsingle(uint8_t address, float value)   {_modules_data.cellbalancecurrentsetpoint[address] = value;}
         void set_cellbalanceenabled(uint8_t address, bool value)            {_modules_data.cellbalanceenable[address] = value;}
 
         bool get_moduleonline(uint8_t address)                              {return _modules_data.moduleonline[address];}
@@ -56,8 +57,9 @@ class Cellmodules {
         float get_cellbalancecurrent(uint8_t address)                       {return _modules_data.cellbalancecurrent[address];}
         uint32_t get_cellerrorregister(uint8_t address)                     {return _modules_data.cellerrorregister[address];}
         uint32_t get_cellcrcerrors(uint8_t address)                         {return _modules_data.cellcrcerrors[address];}
-
-        //calibration
+	void set_cellcrcerrors(uint8_t address, uint32_t value)             {_modules_data.cellcrcerrors[address] = value;}
+        
+	//calibration
         bool calibratemodule(configValue config, uint8_t address, float value);
         float getcalibrationdata(configValue config, uint8_t address);
 

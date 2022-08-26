@@ -61,6 +61,14 @@ bool Cellmodules::getDataFromModulesSingle(void) {
     return true;
     }
 
+//set balancing current to all modules
+void Cellmodules::set_cellbalancecurrentsetpoint(float value){
+    //step throug every cell module to set discharge current
+    for (uint8_t address = 1; address <= _modules_data.numberofmodules; address++){
+        set_cellbalancecurrentsetpointsingle(address, value);
+        }
+    }
+
 //read single cell module
 bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, uint8_t &modulesnotavailable) {
     //reset values: cell module and master error

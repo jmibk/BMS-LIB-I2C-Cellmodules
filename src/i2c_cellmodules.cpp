@@ -301,6 +301,11 @@ float Cellmodules::getcalibrationdata(configValue config, uint8_t address) {
     return data_formatted;
     }
 
+bool Cellmodules::setLocate(uint8_t address, bool state){
+        _writedata(address, 0x04, state);   //set locate
+        _readdata(address, 0x04);           //read back locate
+    }
+
 uint16_t Cellmodules::_readdata(int i2cAddress, byte i2cRegister) {
     //first tell the module which data has to be read from it
     _i2c.beginTransmission(i2cAddress);                   //queuing the slave address

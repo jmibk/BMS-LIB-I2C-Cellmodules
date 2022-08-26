@@ -60,6 +60,8 @@ class Cellmodules {
         bool calibratemodule(configValue config, uint8_t address, float value);
         float getcalibrationdata(configValue config, uint8_t address);
 
+        //locate function
+        bool setLocate(uint8_t address, bool state);
 
     private:
         TwoWire _i2c = TwoWire(USED_I2C_HARDWARE);

@@ -21,6 +21,8 @@ void setup() {
 void loop() {
   battery.getDataFromModulesSingle();
 
+  battery.setLocate(14, true);
+
   Serial.println("Reading data from cell modules");
 
   Serial.println("Modules available: "+String(battery.get_modulesavailable()));

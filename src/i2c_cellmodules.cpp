@@ -85,9 +85,10 @@ bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, ui
         _modules_data.cellvoltage[address] = 0;                   
         _modules_data.celltemperature[address] = 0;               
         _modules_data.cellbalanceenabled[address] = false;            
-        _modules_data.cellbalancecurrent[address] = 0;            
-        _modules_data.cellerrorregister[address] = 0x00000000;            
-        _modules_data.moduleerrorregister[address] |= 0b00000001;     //bit0 = no cell module available        
+        _modules_data.cellbalancecurrent[address] = 0;                           
+        _modules_data.moduleerrorregister[address] |= 0b00000001;     //bit0 = no cell module available   
+        _modules_data.cellerrorregister[address] = 0x00000000;   
+        _modules_data.cellerrorregister[address] |= _modules_data.moduleerrorregister[address] << 24;     
         modulesnotavailable++;        
         return false;
         }
@@ -317,8 +318,14 @@ float Cellmodules::getcalibrationdata(configValue config, uint8_t address) {
     }
 
 bool Cellmodules::setLocate(uint8_t address, bool state){
-        _writedata(address, 0x04, state);   //set locate
-        _readdata(address, 0x04);           //read back locate
+    _writedata(address, 0x04, state);   //set locate
+     
+    //read back locate and return false if not the same
+    if(_readdata(address, 0x04) != state)
+        return false;
+
+    //return
+    return true;
     }
 
 uint16_t Cellmodules::_readdata(int i2cAddress, byte i2cRegister) {

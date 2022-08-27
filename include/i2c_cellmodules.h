@@ -22,6 +22,7 @@ class Cellmodules {
         Cellmodules(void);
         bool init(int pinSDA, int pinSCL);
         bool init(void); 
+        bool checkModuleByAddress(byte address)                             {return _checkModule(address);}
         bool getDataFromModules(void);
         bool getDataFromModulesSingle(void);
 
@@ -57,7 +58,7 @@ class Cellmodules {
         float get_cellbalancecurrent(uint8_t address)                       {return _modules_data.cellbalancecurrent[address];}
         uint32_t get_cellerrorregister(uint8_t address)                     {return _modules_data.cellerrorregister[address];}
         uint32_t get_cellcrcerrors(uint8_t address)                         {return _modules_data.cellcrcerrors[address];}
-	void set_cellcrcerrors(uint8_t address, uint32_t value)             {_modules_data.cellcrcerrors[address] = value;}
+	    void set_cellcrcerrors(uint8_t address, uint32_t value)             {_modules_data.cellcrcerrors[address] = value;}
         
 	//calibration
         bool calibratemodule(configValue config, uint8_t address, float value);

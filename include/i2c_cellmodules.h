@@ -47,17 +47,17 @@ class Cellmodules {
 
         //module data
         void set_cellbalancecurrentsetpoint(float value);                   //set balacing current to all modules
-        void set_cellbalancecurrentsetpointsingle(uint8_t address, float value)   {_modules_data.cellbalancecurrentsetpoint[address] = value;}
-        void set_cellbalanceenabled(uint8_t address, bool value)            {_modules_data.cellbalanceenable[address] = value;}
+        void set_cellbalancecurrentsetpointsingle(uint8_t address, float value)   {if(address < MAX_CELL_MODULES) _modules_data.cellbalancecurrentsetpoint[address] = value;}
+        void set_cellbalanceenabled(uint8_t address, bool value)            {if(address < MAX_CELL_MODULES) _modules_data.cellbalanceenable[address] = value;}
 
-        bool get_moduleonline(uint8_t address)                              {return _modules_data.moduleonline[address];}
-        float get_cellvoltage(uint8_t address)                              {return _modules_data.cellvoltage[address];}
-        float get_celltemperature(uint8_t address)                          {return _modules_data.celltemperature[address];}
-        bool get_cellbalanceenabled(uint8_t address)                        {return _modules_data.cellbalanceenabled[address];}
-        float get_cellbalancecurrent(uint8_t address)                       {return _modules_data.cellbalancecurrent[address];}
-        uint32_t get_cellerrorregister(uint8_t address)                     {return _modules_data.cellerrorregister[address];}
-        uint32_t get_cellcrcerrors(uint8_t address)                         {return _modules_data.cellcrcerrors[address];}
-	    void set_cellcrcerrors(uint8_t address, uint32_t value)             {_modules_data.cellcrcerrors[address] = value;}
+        bool get_moduleonline(uint8_t address)                              {if(address < MAX_CELL_MODULES) return _modules_data.moduleonline[address]; return false;}
+        float get_cellvoltage(uint8_t address)                              {if(address < MAX_CELL_MODULES) return _modules_data.cellvoltage[address]; return false;}
+        float get_celltemperature(uint8_t address)                          {if(address < MAX_CELL_MODULES) return _modules_data.celltemperature[address]; return false;}
+        bool get_cellbalanceenabled(uint8_t address)                        {if(address < MAX_CELL_MODULES) return _modules_data.cellbalanceenabled[address]; return false;}
+        float get_cellbalancecurrent(uint8_t address)                       {if(address < MAX_CELL_MODULES) return _modules_data.cellbalancecurrent[address]; return false;}
+        uint32_t get_cellerrorregister(uint8_t address)                     {if(address < MAX_CELL_MODULES) return _modules_data.cellerrorregister[address]; return false;}
+        uint32_t get_cellcrcerrors(uint8_t address)                         {if(address < MAX_CELL_MODULES) return _modules_data.cellcrcerrors[address]; return false;}
+	    void set_cellcrcerrors(uint8_t address, uint32_t value)             {if(address < MAX_CELL_MODULES)  _modules_data.cellcrcerrors[address] = value;}
         
 	//calibration
         bool calibratemodule(configValue config, uint8_t address, float value);
@@ -65,7 +65,7 @@ class Cellmodules {
 
         //locate function
         bool setLocate(uint8_t address, bool state);
-        bool getLocate(uint8_t address)                                     {return _modules_data.locate_module[address];}
+        bool getLocate(uint8_t address)                                     {if(address < MAX_CELL_MODULES) return _modules_data.locate_module[address]; return false;}
 
     private:
         TwoWire _i2c = TwoWire(USED_I2C_HARDWARE);

@@ -88,7 +88,13 @@ bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, ui
         _modules_data.cellbalancecurrent[address] = 0;                           
         _modules_data.moduleerrorregister[address] |= 0b00000001;     //bit0 = no cell module available   
         _modules_data.cellerrorregister[address] = 0x00000000;   
-        _modules_data.cellerrorregister[address] |= _modules_data.moduleerrorregister[address] << 24;     
+        _modules_data.cellerrorregister[address] |= _modules_data.moduleerrorregister[address] << 24;    
+
+        _modules_data.calibration_voltage[MAX_CELL_MODULES] = 0;           
+        _modules_data.calibration_current[MAX_CELL_MODULES] = 0;           
+        _modules_data.calibration_temperature[MAX_CELL_MODULES] = 0;       
+        _modules_data.locate_module[MAX_CELL_MODULES] = 0;                 
+
         modulesnotavailable++;        
         return false;
         }
@@ -112,6 +118,11 @@ bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, ui
     _modules_data.cellbalancecurrent[address] = _readdata(address, 0x0B) / 1000.0;              //current balancing current
     _modules_data.cellerrorregister[address] = (_readdata(address, 0x09) << 16) + (_readdata(address, 0x08) << 8) + _readdata(address, 0x07);           //errors: 0b00000000 <0x09> <0x08> <0x07>
     _modules_data.cellerrorregister[address] |= _modules_data.moduleerrorregister[address] << 24;
+
+    _modules_data.calibration_voltage[MAX_CELL_MODULES] = (_readdata(address, 0x10)-1000)/1000.0;           
+    _modules_data.calibration_current[MAX_CELL_MODULES] = (_readdata(address, 0x11)-1000)/1000.0;           
+    _modules_data.calibration_temperature[MAX_CELL_MODULES] = (_readdata(address, 0x12)-1000)/10.0;       
+    _modules_data.locate_module[MAX_CELL_MODULES] = _readdata(address, 0x04);  
 
     //set values to cell modules
     //enable balancing
@@ -236,14 +247,17 @@ bool Cellmodules::calibratemodule(configValue config, uint8_t address, float val
             break;
         case VOLTAGE:
             configregister = 0x10;
+            _modules_data.calibration_voltage[address] = value;
             value = (int)(value*1000) + 1000;       //volts to mVolts and offset of 1000mV
             break;
         case CURRENT:
             configregister = 0x11;
+            _modules_data.calibration_current[address] = value;
             value = (int)(value*1000) + 1000;       //amps to mAmps and offset of 1000mA
             break;
         case TEMPERATURE:
             configregister = 0x12;
+            _modules_data.calibration_temperature[address] = value;
             value = (int)(value*10) + 1000;       //deg to ddeg and offset of 1000ddeg
             break;
         default:
@@ -272,52 +286,30 @@ float Cellmodules::getcalibrationdata(configValue config, uint8_t address) {
         return 0xFFFF;
 
     //if it is there, populate register and value
-    byte configregister;      //0x02 = address 0x10 = voltage, 0x11=current, 0x12=temperature
     switch (config) {
         case ADDRESS:
-            configregister = 0x02;
+            return address;
             break;
         case VOLTAGE:
-            configregister = 0x10;
+            return _modules_data.calibration_voltage[address];
             break;
         case CURRENT:
-            configregister = 0x11;
+            return _modules_data.calibration_current[address];
             break;
         case TEMPERATURE:
-            configregister = 0x12;
-            break;
-        default:
-            return 0xFFFF;
-            break; 
-        }
-
-    //read data
-    uint16_t data = _readdata(address, configregister);
-
-    //format data into correct values
-    float data_formatted;
-    switch (config) {
-        case ADDRESS:
-            data_formatted = data;
-            break;
-        case VOLTAGE:
-            data_formatted = (data-1000)/1000.0;
-            break;
-        case CURRENT:
-            data_formatted = (data-1000)/1000.0;
-            break;
-        case TEMPERATURE:
-            data_formatted = (data-1000)/10.0;
+            return _modules_data.calibration_temperature[address];
             break;
         default:
             return 0xFFFF;
             break; 
         }
     
-    return data_formatted;
+    return false;
     }
 
 bool Cellmodules::setLocate(uint8_t address, bool state){
+    _modules_data.locate_module[address] = state;
+
     _writedata(address, 0x04, state);   //set locate
      
     //read back locate and return false if not the same

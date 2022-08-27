@@ -22,7 +22,6 @@ class Cellmodules {
         Cellmodules(void);
         bool init(int pinSDA, int pinSCL);
         bool init(void); 
-        bool checkModuleByAddress(byte address)                             {return _checkModule(address);}
         bool getDataFromModules(void);
         bool getDataFromModulesSingle(void);
 
@@ -66,6 +65,7 @@ class Cellmodules {
 
         //locate function
         bool setLocate(uint8_t address, bool state);
+        bool getLocate(uint8_t address)                                     {return _modules_data.locate_module[address];}
 
     private:
         TwoWire _i2c = TwoWire(USED_I2C_HARDWARE);
@@ -109,6 +109,11 @@ class Cellmodules {
         byte            moduleerrorregister[MAX_CELL_MODULES];           //module error register: master errors
         uint32_t        cellcrcerrors[MAX_CELL_MODULES];                 //crc communication errors since last counter reset
 
+        //calibration data and locate
+        float           calibration_voltage[MAX_CELL_MODULES];           //voltage to calibrate
+        float           calibration_current[MAX_CELL_MODULES];           //current to calibrate
+        float           calibration_temperature[MAX_CELL_MODULES];       //temperature to calibrate
+        bool            locate_module[MAX_CELL_MODULES];                 //locate enabled?
     };
     modules_data_struct _modules_data;
 

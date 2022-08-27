@@ -43,7 +43,7 @@ class Cellmodules {
         uint8_t get_highestcelltemperaturenumber(void)                      {return _modules_data.highestcelltemperaturenumber;}
         float get_batteryvoltage(void)                                      {return _modules_data.batteryvoltage;}
         float get_meancelltemperature(void)                                 {return _modules_data.meancelltemperature;}
-	float get_batterydeltavoltage(void)                                 {return _modules_data.batterydeltavoltage;}
+	    float get_batterydeltavoltage(void)                                 {return _modules_data.batterydeltavoltage;}
 
         //module data
         void set_cellbalancecurrentsetpoint(float value);                   //set balacing current to all modules
@@ -88,7 +88,7 @@ class Cellmodules {
         uint8_t         highestcelltemperaturenumber = 0; 
         float           batteryvoltage = 51.2;
         float           meancelltemperature = 24;
-	float           batterydeltavoltage = 0;
+	    float           batterydeltavoltage = 0;
         uint8_t         modulesavailable = 16;                          //cellmodules that can be communicated with
         uint8_t         modulesnotavailable = 0;                        //cellmodules that are missing for communication
         uint32_t        crcerrors = 0;                                  //crc communication errors since system start

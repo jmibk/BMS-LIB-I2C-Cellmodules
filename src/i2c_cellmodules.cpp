@@ -144,6 +144,10 @@ void Cellmodules::_calculateCellStateValues(void) {
 
     //step throug every cell voltage and temperature and compare / gather your data
     for (uint8_t address = 1; address <= _modules_data.numberofmodules; address++){ 
+        //if module is offline, go to the next module
+        if (!_modules_data.moduleonline[address])
+            continue;
+
         //cell minimum voltage
         if (_modules_data.cellvoltage[address] <= lowestcellvoltage) {
             lowestcellvoltage = _modules_data.cellvoltage[address];
@@ -180,15 +184,15 @@ void Cellmodules::_calculateCellStateValues(void) {
 
         //celltemperature
         meancelltemperature += _modules_data.celltemperature[address];
-
-        //cellsdeltavoltage
-        _modules_data.batterydeltavoltage = highestcellvoltage - lowestcellvoltage;
         }
+
+    //cellsdeltavoltage
+    _modules_data.batterydeltavoltage = highestcellvoltage - lowestcellvoltage;
 
     //put data into struct (to avoid short outbreaks of values whren reading them)
     _modules_data.batteryvoltage = batteryvoltage;
     if (_modules_data.numberofmodules)      //avoid division /0
-        _modules_data.meancelltemperature = meancelltemperature / _modules_data.numberofmodules;
+        _modules_data.meancelltemperature = meancelltemperature / _modules_data.modulesavailable;
     }
 
 //check if a i2c device is available on the bus. Returns true if board is there, otherwise false.

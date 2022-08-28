@@ -40,6 +40,12 @@ void loop() {
 
   Serial.println("Battery V: "+String(battery.get_batteryvoltage(),3));
   Serial.println("Mean Temperature: "+String(battery.get_meancelltemperature(),1));
+
+  battery.scanBusForModules();
+  for (uint8_t i = 0; i <= 200; i++){
+      if (battery.get_moduleonline(i))
+          Serial.println("found module "+String(i));
+      }
 /*
   for (uint8_t i = 1; i <= 16; i++){
     uint32_t temp = battery.get_cellerrorregister(i);

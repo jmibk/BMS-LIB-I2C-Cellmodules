@@ -22,6 +22,7 @@ class Cellmodules {
         Cellmodules(void);
         bool init(int pinSDA, int pinSCL);
         bool init(void); 
+        bool scanBusForModules(void);
         bool getDataFromModules(void);
         bool getDataFromModulesSingle(void);
 
@@ -96,24 +97,24 @@ class Cellmodules {
         uint8_t         moduleindex = 0;
         
         //individual cell data to set
-        float           cellbalancecurrentsetpoint[MAX_CELL_MODULES];   //for setting the desired balancing current
-        bool            cellbalanceenable[MAX_CELL_MODULES];            //for enabling the cell balance procedure
+        float           cellbalancecurrentsetpoint[MAX_CELL_MODULES+1]; //for setting the desired balancing current
+        bool            cellbalanceenable[MAX_CELL_MODULES+1];          //for enabling the cell balance procedure
 
         //individual cell data
-        bool            moduleonline[MAX_CELL_MODULES];                  //cell module is online (true/false)
-        float           cellvoltage[MAX_CELL_MODULES];                   //cell voltage in volts
-        float           celltemperature[MAX_CELL_MODULES];               //cell temperature in degC
-        bool            cellbalanceenabled[MAX_CELL_MODULES];            //cell balancing enabled (true/false)
-        float           cellbalancecurrent[MAX_CELL_MODULES];            //current cell balance current
-        uint32_t        cellerrorregister[MAX_CELL_MODULES];             //cell error register: <mastererrors> <notimplemented> <notimplemented> <value errors>
-        byte            moduleerrorregister[MAX_CELL_MODULES];           //module error register: master errors
-        uint32_t        cellcrcerrors[MAX_CELL_MODULES];                 //crc communication errors since last counter reset
+        bool            moduleonline[MAX_CELL_MODULES+1];               //cell module is online (true/false)
+        float           cellvoltage[MAX_CELL_MODULES+1];                //cell voltage in volts
+        float           celltemperature[MAX_CELL_MODULES+1];            //cell temperature in degC
+        bool            cellbalanceenabled[MAX_CELL_MODULES+1];         //cell balancing enabled (true/false)
+        float           cellbalancecurrent[MAX_CELL_MODULES+1];         //current cell balance current
+        uint32_t        cellerrorregister[MAX_CELL_MODULES+1];          //cell error register: <mastererrors> <notimplemented> <notimplemented> <value errors>
+        byte            moduleerrorregister[MAX_CELL_MODULES+1];        //module error register: master errors
+        uint32_t        cellcrcerrors[MAX_CELL_MODULES+1];              //crc communication errors since last counter reset
 
         //calibration data and locate
-        float           calibration_voltage[MAX_CELL_MODULES];           //voltage to calibrate
-        float           calibration_current[MAX_CELL_MODULES];           //current to calibrate
-        float           calibration_temperature[MAX_CELL_MODULES];       //temperature to calibrate
-        bool            locate_module[MAX_CELL_MODULES];                 //locate enabled?
+        float           calibration_voltage[MAX_CELL_MODULES+1];        //voltage to calibrate
+        float           calibration_current[MAX_CELL_MODULES+1];        //current to calibrate
+        float           calibration_temperature[MAX_CELL_MODULES+1];    //temperature to calibrate
+        bool            locate_module[MAX_CELL_MODULES+1];              //locate enabled?
     };
     modules_data_struct _modules_data;
 

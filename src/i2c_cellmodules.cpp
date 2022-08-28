@@ -14,6 +14,14 @@ bool Cellmodules::init(void) {
     return init(13, 16);
     }
 
+bool Cellmodules::scanBusForModules(void){
+    for (uint8_t module = 1; module <= MAX_CELL_MODULES; module++){
+        if(_checkModule(module))
+            _modules_data.moduleonline[module] = true;
+        }
+    return true;
+    }
+
 bool Cellmodules::getDataFromModules(void) {
     //reset values: cellmodule communication states
     _modules_data.modulesavailable = 0;              
@@ -76,7 +84,7 @@ bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, ui
     _modules_data.moduleerrorregister[address] = 0x00; 
 
     //if address is greather than maximum cell module count, return false
-    if (address >= MAX_CELL_MODULES)    
+    if (address > MAX_CELL_MODULES)    
         return false;
 
     //try to communicate with cell module. if an error occours, set all cell data to zero and continue with next module
@@ -218,7 +226,7 @@ bool Cellmodules::_checkModule(byte i2cAddress) {
 
 bool Cellmodules::_writedata(int i2cAddress, byte i2cRegister, uint16_t data) {
     //cehck if address is in range 
-    if(i2cAddress >= MAX_CELL_MODULES) 
+    if(i2cAddress > MAX_CELL_MODULES) 
         return false;
 
     uint16_t crc = ( i2cRegister + (data >> 8) + (data >> 0) ) % 256;
@@ -239,7 +247,7 @@ bool Cellmodules::_writedata(int i2cAddress, byte i2cRegister, uint16_t data) {
 //calibration procedures
 bool Cellmodules::calibratemodule(configValue config, uint8_t address, float value){
     //cehck if address is in range 
-    if(address >= MAX_CELL_MODULES) 
+    if(address > MAX_CELL_MODULES) 
         return false;
 
     //check if module is there
@@ -290,7 +298,7 @@ bool Cellmodules::calibratemodule(configValue config, uint8_t address, float val
 
 float Cellmodules::getcalibrationdata(configValue config, uint8_t address) {
     //cehck if address is in range 
-    if(address >= MAX_CELL_MODULES) 
+    if(address > MAX_CELL_MODULES) 
         return false;
 
     //check if module is there
@@ -321,7 +329,7 @@ float Cellmodules::getcalibrationdata(configValue config, uint8_t address) {
 
 bool Cellmodules::setLocate(uint8_t address, bool state){
     //cehck if address is in range 
-    if(address >= MAX_CELL_MODULES) 
+    if(address > MAX_CELL_MODULES) 
         return false;
 
     _modules_data.locate_module[address] = state;

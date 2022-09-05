@@ -20,6 +20,7 @@ enum configValue {
 class Cellmodules {
     public:
         Cellmodules(void);
+        bool init(int pinSDA, int pinSCL, uint32_t speed);
         bool init(int pinSDA, int pinSCL);
         bool init(void); 
         bool scanBusForModules(void);

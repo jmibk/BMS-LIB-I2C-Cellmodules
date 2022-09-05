@@ -4,6 +4,11 @@
 Cellmodules::Cellmodules(void) {
     }
 
+bool Cellmodules::init(int pinSDA, int pinSCL, uint32_t speed) {
+    _i2c.begin(pinSDA, pinSCL, speed);      
+    return true;
+    }
+
 bool Cellmodules::init(int pinSDA, int pinSCL) {
     //_i2c.begin(13, 16, I2C_SPEED);  //ESP32: I2C_SDA, I2C_SCL - ESP32-EVB
     _i2c.begin(pinSDA, pinSCL, I2C_SPEED);      //ESP32: I2C_SDA, I2C_SCL - ESP32-EVB

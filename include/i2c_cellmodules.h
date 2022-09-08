@@ -6,7 +6,7 @@ uses i2c channel 0
 #include <Arduino.h>
 #include <Wire.h>
 
-#define USED_I2C_HARDWARE   0
+#define USED_I2C_HARDWARE   1
 #define I2C_SPEED           1000ul
 #define MAX_CELL_MODULES    127
 

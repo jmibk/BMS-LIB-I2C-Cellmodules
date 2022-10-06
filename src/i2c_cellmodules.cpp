@@ -105,11 +105,11 @@ bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, ui
         _modules_data.cellerrorregister[address] = 0x00000000;   
         _modules_data.cellerrorregister[address] |= _modules_data.moduleerrorregister[address] << 24;    
 
-        _modules_data.calibration_reference[MAX_CELL_MODULES] = 0; 
-        _modules_data.calibration_voltage[MAX_CELL_MODULES] = 0;           
-        _modules_data.calibration_current[MAX_CELL_MODULES] = 0;           
-        _modules_data.calibration_temperature[MAX_CELL_MODULES] = 0;       
-        _modules_data.locate_module[MAX_CELL_MODULES] = 0;                 
+        _modules_data.calibration_reference[address] = 0; 
+        _modules_data.calibration_voltage[address] = 0;           
+        _modules_data.calibration_current[address] = 0;           
+        _modules_data.calibration_temperature[address] = 0;       
+        _modules_data.locate_module[address] = 0;                 
 
         modulesnotavailable++;        
         return false;

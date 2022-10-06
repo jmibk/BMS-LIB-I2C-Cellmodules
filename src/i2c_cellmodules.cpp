@@ -273,7 +273,7 @@ bool Cellmodules::calibratemodule(configValue config, uint8_t address, float val
         case REFERENCE:
             configregister = 0x13;
             _modules_data.calibration_reference[address] = value;
-            value = (int)(value*1000) + 1000;       //volts to mVolts and offset of 1000mV
+            value = (int)(value*1000);       //volts to mVolts
             break;
         case VOLTAGE:
             configregister = 0x10;

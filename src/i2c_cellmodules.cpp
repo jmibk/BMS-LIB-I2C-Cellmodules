@@ -105,6 +105,7 @@ bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, ui
         _modules_data.cellerrorregister[address] = 0x00000000;   
         _modules_data.cellerrorregister[address] |= _modules_data.moduleerrorregister[address] << 24;    
 
+        _modules_data.calibration_reference[MAX_CELL_MODULES] = 0; 
         _modules_data.calibration_voltage[MAX_CELL_MODULES] = 0;           
         _modules_data.calibration_current[MAX_CELL_MODULES] = 0;           
         _modules_data.calibration_temperature[MAX_CELL_MODULES] = 0;       
@@ -134,6 +135,7 @@ bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, ui
     _modules_data.cellerrorregister[address] = (_readdata(address, 0x09) << 16) + (_readdata(address, 0x08) << 8) + _readdata(address, 0x07);           //errors: 0b00000000 <0x09> <0x08> <0x07>
     _modules_data.cellerrorregister[address] |= _modules_data.moduleerrorregister[address] << 24;
 
+    _modules_data.calibration_reference[MAX_CELL_MODULES] = (_readdata(address, 0x13)-1000)/1000.0;  
     _modules_data.calibration_voltage[MAX_CELL_MODULES] = (_readdata(address, 0x10)-1000)/1000.0;           
     _modules_data.calibration_current[MAX_CELL_MODULES] = (_readdata(address, 0x11)-1000)/1000.0;           
     _modules_data.calibration_temperature[MAX_CELL_MODULES] = (_readdata(address, 0x12)-1000)/10.0;       
@@ -268,6 +270,11 @@ bool Cellmodules::calibratemodule(configValue config, uint8_t address, float val
             configregister = 0x02;
             value = (int)value;                     //make it integer
             break;
+        case REFERENCE:
+            configregister = 0x13;
+            _modules_data.calibration_reference[address] = value;
+            value = (int)(value*1000) + 1000;       //volts to mVolts and offset of 1000mV
+            break;
         case VOLTAGE:
             configregister = 0x10;
             _modules_data.calibration_voltage[address] = value;
@@ -316,6 +323,9 @@ float Cellmodules::getcalibrationdata(configValue config, uint8_t address) {
     switch (config) {
         case ADDRESS:
             return address;
+            break;
+        case REFERENCE:
+            return _modules_data.calibration_reference[address];
             break;
         case VOLTAGE:
             return _modules_data.calibration_voltage[address];

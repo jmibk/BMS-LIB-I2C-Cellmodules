@@ -12,6 +12,7 @@ uses i2c channel 0
 
 enum configValue {
     ADDRESS,
+    REFERENCE,
     VOLTAGE,
     CURRENT,
     TEMPERATURE
@@ -112,6 +113,7 @@ class Cellmodules {
         uint32_t        cellcrcerrors[MAX_CELL_MODULES+1];              //crc communication errors since last counter reset
 
         //calibration data and locate
+        float           calibration_reference[MAX_CELL_MODULES+1];      //reference voltage to calibrate
         float           calibration_voltage[MAX_CELL_MODULES+1];        //voltage to calibrate
         float           calibration_current[MAX_CELL_MODULES+1];        //current to calibrate
         float           calibration_temperature[MAX_CELL_MODULES+1];    //temperature to calibrate

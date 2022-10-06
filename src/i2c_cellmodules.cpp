@@ -135,11 +135,11 @@ bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, ui
     _modules_data.cellerrorregister[address] = (_readdata(address, 0x09) << 16) + (_readdata(address, 0x08) << 8) + _readdata(address, 0x07);           //errors: 0b00000000 <0x09> <0x08> <0x07>
     _modules_data.cellerrorregister[address] |= _modules_data.moduleerrorregister[address] << 24;
 
-    _modules_data.calibration_reference[MAX_CELL_MODULES] = _readdata(address, 0x13)/1000.0;  
-    _modules_data.calibration_voltage[MAX_CELL_MODULES] = (_readdata(address, 0x10)-1000)/1000.0;           
-    _modules_data.calibration_current[MAX_CELL_MODULES] = (_readdata(address, 0x11)-1000)/1000.0;           
-    _modules_data.calibration_temperature[MAX_CELL_MODULES] = (_readdata(address, 0x12)-1000)/10.0;       
-    _modules_data.locate_module[MAX_CELL_MODULES] = _readdata(address, 0x04);  
+    _modules_data.calibration_reference[address] = _readdata(address, 0x13)/1000.0;  
+    _modules_data.calibration_voltage[address] = (_readdata(address, 0x10)-1000)/1000.0;           
+    _modules_data.calibration_current[address] = (_readdata(address, 0x11)-1000)/1000.0;           
+    _modules_data.calibration_temperature[address] = (_readdata(address, 0x12)-1000)/10.0;       
+    _modules_data.locate_module[address] = _readdata(address, 0x04);  
 
     //set values to cell modules
     //enable balancing

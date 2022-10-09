@@ -21,10 +21,13 @@ bool Cellmodules::init(void) {
 
 bool Cellmodules::scanBusForModules(void){
     for (uint8_t module = 1; module <= MAX_CELL_MODULES; module++){
-        if(_checkModule(module))
+        if(_checkModule(module)){
             _modules_data.moduleonline[module] = true;          //module is online
-        else
+			Serial.println("Found: "+String(module));
+			}
+        else {
             _modules_data.moduleonline[module] = false;         //module is offline
+			}
         }
     return true;
     }

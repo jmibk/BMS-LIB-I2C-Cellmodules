@@ -58,6 +58,7 @@ class Cellmodules {
         float get_celltemperature(uint8_t address)                          {if(address < MAX_CELL_MODULES) return _modules_data.celltemperature[address]; return false;}
         bool get_cellbalanceenabled(uint8_t address)                        {if(address < MAX_CELL_MODULES) return _modules_data.cellbalanceenabled[address]; return false;}
         float get_cellbalancecurrent(uint8_t address)                       {if(address < MAX_CELL_MODULES) return _modules_data.cellbalancecurrent[address]; return false;}
+        uint16_t get_pwmvalue(uint16_t address)                             {if(address < MAX_CELL_MODULES) return _modules_data.discharge_pwm_value[address]; return false;}  
         uint32_t get_cellerrorregister(uint8_t address)                     {if(address < MAX_CELL_MODULES) return _modules_data.cellerrorregister[address]; return false;}
         uint32_t get_cellcrcerrors(uint8_t address)                         {if(address < MAX_CELL_MODULES) return _modules_data.cellcrcerrors[address]; return false;}
 	    void set_cellcrcerrors(uint8_t address, uint32_t value)             {if(address < MAX_CELL_MODULES)  _modules_data.cellcrcerrors[address] = value;}
@@ -109,6 +110,7 @@ class Cellmodules {
         bool            cellbalanceenabled[MAX_CELL_MODULES+1];         //cell balancing enabled (true/false)
         float           cellbalancecurrent[MAX_CELL_MODULES+1];         //current cell balance current
         uint32_t        cellerrorregister[MAX_CELL_MODULES+1];          //cell error register: <mastererrors> <notimplemented> <notimplemented> <value errors>
+        uint16_t        discharge_pwm_value[MAX_CELL_MODULES+1];        //raw pwm value of discharge system
         byte            moduleerrorregister[MAX_CELL_MODULES+1];        //module error register: master errors
         uint32_t        cellcrcerrors[MAX_CELL_MODULES+1];              //crc communication errors since last counter reset
 

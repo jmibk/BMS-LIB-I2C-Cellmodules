@@ -101,6 +101,7 @@ bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, ui
         _modules_data.celltemperature[address] = 0;               
         _modules_data.cellbalanceenabled[address] = false;            
         _modules_data.cellbalancecurrent[address] = 0;                           
+        _modules_data.discharge_pwm_value[address] = 0;
         _modules_data.moduleerrorregister[address] |= 0b00000001;     //bit0 = no cell module available   
         _modules_data.cellerrorregister[address] = 0x00000000;   
         _modules_data.cellerrorregister[address] |= _modules_data.moduleerrorregister[address] << 24;    
@@ -132,6 +133,7 @@ bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, ui
     _modules_data.celltemperature[address] = (_readdata(address, 0x06) - 1000)/10.0;            //temperature
     _modules_data.cellbalanceenabled[address] = _readdata(address, 0x0C);                       //balancing active
     _modules_data.cellbalancecurrent[address] = _readdata(address, 0x0B) / 1000.0;              //current balancing current
+    _modules_data.discharge_pwm_value[address] = _readdata(address, 0x0F);                      //pwm value
     _modules_data.cellerrorregister[address] = (_readdata(address, 0x09) << 16) + (_readdata(address, 0x08) << 8) + _readdata(address, 0x07);           //errors: 0b00000000 <0x09> <0x08> <0x07>
     _modules_data.cellerrorregister[address] |= _modules_data.moduleerrorregister[address] << 24;
 

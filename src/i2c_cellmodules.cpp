@@ -147,8 +147,7 @@ bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, ui
     _modules_data.calibration_reference[address] = _readdata(address, 0x13)/1000.0;  
     _modules_data.calibration_voltage[address] = (_readdata(address, 0x10)-1000)/1000.0;           
     _modules_data.calibration_current[address] = (_readdata(address, 0x11)-1000)/1000.0;           
-    _modules_data.calibration_temperature[address] = (_readdata(address, 0x12)-1000)/10.0; 
-
+    _modules_data.calibration_temperature[address] = (_readdata(address, 0x12)-1000)/10.0;
 	_modules_data.calibration_current_compensation[address] = _readdata(address, 0x14);  
 	_modules_data.calibration_current_missmatch_time[address] = _readdata(address, 0x15);  
 	_modules_data.calibration_current_regulation_step[address] = _readdata(address, 0x16);  

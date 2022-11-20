@@ -307,27 +307,27 @@ bool Cellmodules::calibratemodule(configValue config, uint8_t address, float val
             break;
         case CURRENTCOMPENSATION:
             configregister = 0x14;
-            _modules_data.calibration_temperature[address] = value;
+            _modules_data.calibration_current_compensation[address] = value;
             value = (int)(value);      
             break;
         case CURRENT_MISSMATCH_TIME:
             configregister = 0x15;
-            _modules_data.calibration_temperature[address] = value;
+            _modules_data.calibration_current_missmatch_time[address] = value;
             value = (int)(value);     
             break;
         case CURRENT_REGULATION_STEP:
             configregister = 0x16;
-            _modules_data.calibration_temperature[address] = value;
+            _modules_data.calibration_current_regulation_step[address] = value;
             value = (int)(value); 
             break;
         case CURRENT_DEVIATION:
             configregister = 0x17;
-            _modules_data.calibration_temperature[address] = value;
+            _modules_data.calibration_current_deviation[address] = value;
             value = (int)(value*1000);       //Volts to mV
             break;
         case CURRENT_MAX:
             configregister = 0x18;
-            _modules_data.calibration_temperature[address] = value;
+            _modules_data.calibration_current_maximum[address] = value;
             value = (int)(value*1000);       //volts to mV
             break;
         default:

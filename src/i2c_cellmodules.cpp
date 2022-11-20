@@ -112,6 +112,11 @@ bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, ui
         _modules_data.calibration_voltage[address] = 0;           
         _modules_data.calibration_current[address] = 0;           
         _modules_data.calibration_temperature[address] = 0;       
+		_modules_data.calibration_current_compensation[address] = 0;  
+		_modules_data.calibration_current_missmatch_time[address] = 0;  
+		_modules_data.calibration_current_regulation_step[address] = 0;  
+		_modules_data.calibration_current_deviation[address] = 0;  
+		_modules_data.calibration_current_maximum[address] = 0;  
         _modules_data.locate_module[address] = 0;                 
 
         modulesnotavailable++;        
@@ -142,7 +147,14 @@ bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, ui
     _modules_data.calibration_reference[address] = _readdata(address, 0x13)/1000.0;  
     _modules_data.calibration_voltage[address] = (_readdata(address, 0x10)-1000)/1000.0;           
     _modules_data.calibration_current[address] = (_readdata(address, 0x11)-1000)/1000.0;           
-    _modules_data.calibration_temperature[address] = (_readdata(address, 0x12)-1000)/10.0;       
+    _modules_data.calibration_temperature[address] = (_readdata(address, 0x12)-1000)/10.0; 
+
+	_modules_data.calibration_current_compensation[address] = _readdata(address, 0x14);  
+	_modules_data.calibration_current_missmatch_time[address] = _readdata(address, 0x15);  
+	_modules_data.calibration_current_regulation_step[address] = _readdata(address, 0x16);  
+	_modules_data.calibration_current_deviation[address] = _readdata(address, 0x17)/1000.0;  
+	_modules_data.calibration_current_maximum[address] = _readdata(address, 0x18)/1000.0;  
+		
     _modules_data.locate_module[address] = _readdata(address, 0x04);  
 
     //set values to cell modules
@@ -294,6 +306,31 @@ bool Cellmodules::calibratemodule(configValue config, uint8_t address, float val
             _modules_data.calibration_temperature[address] = value;
             value = (int)(value*10) + 1000;       //deg to ddeg and offset of 1000ddeg
             break;
+        case CURRENTCOMPENSATION:
+            configregister = 0x14;
+            _modules_data.calibration_temperature[address] = value;
+            value = (int)(value);      
+            break;
+        case CURRENT_MISSMATCH_TIME:
+            configregister = 0x15;
+            _modules_data.calibration_temperature[address] = value;
+            value = (int)(value);     
+            break;
+        case CURRENT_REGULATION_STEP:
+            configregister = 0x16;
+            _modules_data.calibration_temperature[address] = value;
+            value = (int)(value); 
+            break;
+        case CURRENT_DEVIATION:
+            configregister = 0x17;
+            _modules_data.calibration_temperature[address] = value;
+            value = (int)(value*1000);       //Volts to mV
+            break;
+        case CURRENT_MAX:
+            configregister = 0x18;
+            _modules_data.calibration_temperature[address] = value;
+            value = (int)(value*1000);       //volts to mV
+            break;
         default:
             return false;
             break; 
@@ -340,6 +377,21 @@ float Cellmodules::getcalibrationdata(configValue config, uint8_t address) {
         case TEMPERATURE:
             return _modules_data.calibration_temperature[address];
             break;
+        case CURRENTCOMPENSATION:
+            return _modules_data.calibration_current_compensation[address];
+            break;
+        case CURRENT_MISSMATCH_TIME:
+            return _modules_data.calibration_current_missmatch_time[address];
+            break;
+        case CURRENT_REGULATION_STEP:
+            return _modules_data.calibration_current_regulation_step[address];
+            break;
+        case CURRENT_DEVIATION:
+            return _modules_data.calibration_current_deviation[address];
+            break;
+        case CURRENT_MAX:
+            return _modules_data.calibration_current_maximum[address];
+            break;		
         default:
             return 0xFFFF;
             break; 

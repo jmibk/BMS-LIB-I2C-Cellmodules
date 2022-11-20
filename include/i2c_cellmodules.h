@@ -15,7 +15,12 @@ enum configValue {
     REFERENCE,
     VOLTAGE,
     CURRENT,
-    TEMPERATURE
+    TEMPERATURE,
+	CURRENTCOMPENSATION,
+	CURRENT_MISSMATCH_TIME,
+	CURRENT_REGULATION_STEP,
+	CURRENT_DEVIATION,
+	CURRENT_MAX
 };
 
 class Cellmodules {
@@ -63,7 +68,7 @@ class Cellmodules {
         uint32_t get_cellcrcerrors(uint8_t address)                         {if(address < MAX_CELL_MODULES) return _modules_data.cellcrcerrors[address]; return false;}
 	    void set_cellcrcerrors(uint8_t address, uint32_t value)             {if(address < MAX_CELL_MODULES)  _modules_data.cellcrcerrors[address] = value;}
         
-	//calibration
+		//calibration
         bool calibratemodule(configValue config, uint8_t address, float value);
         float getcalibrationdata(configValue config, uint8_t address);
 
@@ -115,11 +120,16 @@ class Cellmodules {
         uint32_t        cellcrcerrors[MAX_CELL_MODULES+1];              //crc communication errors since last counter reset
 
         //calibration data and locate
-        float           calibration_reference[MAX_CELL_MODULES+1];      //reference voltage
-        float           calibration_voltage[MAX_CELL_MODULES+1];        //voltage to calibrate
-        float           calibration_current[MAX_CELL_MODULES+1];        //current to calibrate
-        float           calibration_temperature[MAX_CELL_MODULES+1];    //temperature to calibrate
-        bool            locate_module[MAX_CELL_MODULES+1];              //locate enabled?
+        float           calibration_reference[MAX_CELL_MODULES+1];      			//reference voltage
+        float           calibration_voltage[MAX_CELL_MODULES+1];        			//voltage to calibrate
+        float           calibration_current[MAX_CELL_MODULES+1];        			//current to calibrate
+        float           calibration_temperature[MAX_CELL_MODULES+1];    			//temperature to calibrate
+		uint16_t        calibration_current_compensation[MAX_CELL_MODULES+1];   	//discharge current compensation to calibrate
+		uint16_t        calibration_current_missmatch_time[MAX_CELL_MODULES+1]; 	//discharge current missmatch timer
+		uint8_t        	calibration_current_regulation_step[MAX_CELL_MODULES+1]; 	//discharge current regulation step
+		float       	calibration_current_deviation[MAX_CELL_MODULES+1]; 			//max allowable current deviation while discharging
+		float       	calibration_current_maximum[MAX_CELL_MODULES+1]; 			//max allowable current for discharge current
+        bool            locate_module[MAX_CELL_MODULES+1];              			//locate enabled?
     };
     modules_data_struct _modules_data;
 

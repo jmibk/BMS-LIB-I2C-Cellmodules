@@ -44,7 +44,7 @@ class Cellmodules {
 
 /*DEPRICATED*/
         //old
-        bool scanForModules(void)                                           {return scanForModules(0);}
+        bool scanForModules(void)                                           {return scanForModules(1);}
 /*DEPRICATED END*/
 
         void set_batterymode(batteryConfig config)                          {_modules_data.battery_config = config;}                                           
@@ -57,8 +57,8 @@ class Cellmodules {
 
 /*DEPRICATED*/
         //old
-        void set_numberofmodules(uint8_t value)                             {set_numberofmodules(0, value);}  
-        uint8_t get_numberofmodules(void)                                   {return get_numberofmodules(0);}
+        void set_numberofmodules(uint8_t value)                             {set_numberofmodules(1, value);}  
+        uint8_t get_numberofmodules(void)                                   {return get_numberofmodules(1);}
 /*DEPRICATED END*/
 
         //global module data
@@ -119,8 +119,8 @@ class Cellmodules {
 
 /*DEPRICATED*/
         //old
-        bool calibratemodule(configValue config, uint8_t address, float value)              {return calibratemodule(config, 0, address, value);}
-        float get_calibrationdata(configValue config, uint8_t address)                      {return get_calibrationdata(config, 0, address);}
+        bool calibratemodule(configValue config, uint8_t address, float value)              {return calibratemodule(config, 1, address, value);}
+        float get_calibrationdata(configValue config, uint8_t address)                      {return get_calibrationdata(config, 1, address);}
 /*DEPRICATED END*/
 
         //locate function
@@ -130,8 +130,8 @@ class Cellmodules {
 
 /*DEPRICATED*/
         //old
-        bool set_locate(uint8_t address, bool state)                                         {return set_locate(0, address, state);}
-        bool get_locate(uint8_t address)                                                     {return get_locate(0, address);}
+        bool set_locate(uint8_t address, bool state)                                         {return set_locate(1, address, state);}
+        bool get_locate(uint8_t address)                                                     {return get_locate(1, address);}
 /*DEPRICATED END*/
 
 //    private:

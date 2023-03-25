@@ -136,7 +136,7 @@ bool Cellmodules::_readCellModule(uint8_t lane, uint8_t address, uint16_t &modul
     //everything looks ok read all other values from the cell modules
     _modules_data.cellvoltage[lane][address] = _readdata(lane, address, 0x05) / 1000.0;                     //cell voltage
     _modules_data.celltemperature[lane][address] = (_readdata(lane, address, 0x06) - 1000)/10.0;            //temperature
-    //_modules_data.cellbalanceenabled[lane][address] = _readdata(lane, address, 0x0C);                       //balancing active
+    _modules_data.cellbalanceenabled[lane][address] = _readdata(lane, address, 0x0C);                       //balancing active
     _modules_data.cellbalancecurrent[lane][address] = _readdata(lane, address, 0x0B) / 1000.0;              //current balancing current
     //_modules_data.discharge_pwm_value[lane][address] = _readdata(lane, address, 0x0F);                      //pwm value
     _modules_data.cellerrorregister[lane][address] = (_readdata(lane, address, 0x09) << 16) + (_readdata(lane, address, 0x08) << 8) + _readdata(lane, address, 0x07);           //errors: 0b00000000 <0x09> <0x08> <0x07>

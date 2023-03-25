@@ -37,13 +37,14 @@ class Cellmodules {
         bool init(void); 
 
         //new
-        bool scanBusForModules(uint8_t lane);
+        bool scanForModules(uint8_t lane);
         bool getDataFromModules(void);
-        bool getDataFromModulesSingle(void);
+        bool getDataFromModulesSingle(void)                                 {return getDataFromModulesSingle(true);}            //catches also calibration data
+        bool getDataFromModulesSingle(boolean fullData);                                                                        //catches calibration data true/false
 
 /*DEPRICATED*/
         //old
-        bool scanBusForModules(void)                                        {return scanBusForModules(0);}
+        bool scanForModules(void)                                           {return scanForModules(0);}
 /*DEPRICATED END*/
 
         void set_batterymode(batteryConfig config)                          {_modules_data.battery_config = config;}                                           
@@ -76,7 +77,7 @@ class Cellmodules {
         float get_batteryvoltage(void)                                      {return _modules_data.batteryvoltage;}
         float get_batteryvoltage(uint8_t lane)                              {return _modules_data.lane_voltage[lane];}
         float get_meancelltemperature(void)                                 {return _modules_data.meancelltemperature;}
-	    float get_batterydeltavoltage(void)                                 {return _modules_data.batterydeltavoltage;}
+	float get_batterydeltavoltage(void)                                 {return _modules_data.batterydeltavoltage;}
 
         //module data
         //new
@@ -92,23 +93,23 @@ class Cellmodules {
         uint16_t get_pwmvalue(uint8_t lane, uint16_t address)                               {if(address < MAX_CELL_MODULES) return _modules_data.discharge_pwm_value[lane][address]; return false;}  
         uint32_t get_cellerrorregister(uint8_t lane, uint8_t address)                       {if(address < MAX_CELL_MODULES) return _modules_data.cellerrorregister[lane][address]; return false;}
         uint32_t get_cellcrcerrors(uint8_t lane, uint8_t address)                           {if(address < MAX_CELL_MODULES) return _modules_data.cellcrcerrors[lane][address]; return false;}
-	    void set_cellcrcerrors(uint8_t lane, uint8_t address, uint32_t value)               {if(address < MAX_CELL_MODULES)  _modules_data.cellcrcerrors[lane][address] = value;}
+	void set_cellcrcerrors(uint8_t lane, uint8_t address, uint32_t value)               {if(address < MAX_CELL_MODULES)  _modules_data.cellcrcerrors[lane][address] = value;}
 
 /*DEPRICATED*/
         //old
-        void set_cellbalancecurrentsetpoint(float value)                                    {set_cellbalancecurrentsetpoint(0, value);}
-        void set_cellbalancecurrentsetpointsingle(uint8_t address, float value)             {set_cellbalancecurrentsetpointsingle(0, address, value);}
-        void set_cellbalanceenabled(uint8_t address, bool value)                            {set_cellbalanceenabled(0, address, value);}
+        void set_cellbalancecurrentsetpoint(float value)                                    {set_cellbalancecurrentsetpoint(1, value);}
+        void set_cellbalancecurrentsetpointsingle(uint8_t address, float value)             {set_cellbalancecurrentsetpointsingle(1, address, value);}
+        void set_cellbalanceenabled(uint8_t address, bool value)                            {set_cellbalanceenabled(1, address, value);}
 
-        bool get_moduleonline(uint8_t address)                                              {return get_moduleonline(0, address);}
-        float get_cellvoltage(uint8_t address)                                              {return get_cellvoltage(0, address);}
-        float get_celltemperature(uint8_t address)                                          {return get_celltemperature(0, address);}
-        bool get_cellbalanceenabled(uint8_t address)                                        {return get_cellbalanceenabled(0, address);}
-        float get_cellbalancecurrent(uint8_t address)                                       {return get_cellbalancecurrent(0, address);}
-        uint16_t get_pwmvalue(uint16_t address)                                             {return get_pwmvalue(0, address);} 
-        uint32_t get_cellerrorregister(uint8_t address)                                     {return get_cellerrorregister(0, address);}
-        uint32_t get_cellcrcerrors(uint8_t address)                                         {return get_cellcrcerrors(0, address);}
-	    void set_cellcrcerrors(uint8_t address, uint32_t value)                             {set_cellcrcerrors(0, address, value);}
+        bool get_moduleonline(uint8_t address)                                              {return get_moduleonline(1, address);}
+        float get_cellvoltage(uint8_t address)                                              {return get_cellvoltage(1, address);}
+        float get_celltemperature(uint8_t address)                                          {return get_celltemperature(1, address);}
+        bool get_cellbalanceenabled(uint8_t address)                                        {return get_cellbalanceenabled(1, address);}
+        float get_cellbalancecurrent(uint8_t address)                                       {return get_cellbalancecurrent(1, address);}
+        uint16_t get_pwmvalue(uint16_t address)                                             {return get_pwmvalue(1, address);} 
+        uint32_t get_cellerrorregister(uint8_t address)                                     {return get_cellerrorregister(1, address);}
+        uint32_t get_cellcrcerrors(uint8_t address)                                         {return get_cellcrcerrors(1, address);}
+	void set_cellcrcerrors(uint8_t address, uint32_t value)                             {set_cellcrcerrors(1, address, value);}
 /*DEPRICATED END*/
      
 		//calibration
@@ -158,7 +159,7 @@ class Cellmodules {
         uint8_t         highestcelltemperaturenumber = 0; 
         float           batteryvoltage = 51.2;
         float           meancelltemperature = 24;
-	    float           batterydeltavoltage = 0;
+	float           batterydeltavoltage = 0;
         uint16_t        modulesavailable = 16;                                                          //cellmodules that can be communicated with
         uint16_t        modulesnotavailable = 0;                                                        //cellmodules that are missing for communication
         uint32_t        crcerrors = 0;                                                                  //crc communication errors since system start

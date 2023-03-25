@@ -20,7 +20,7 @@ bool Cellmodules::init(void) {
     return init(13, 16);
     }
 
-bool Cellmodules::scanBusForModules(uint8_t lane){
+bool Cellmodules::scanForModules(uint8_t lane){
     for (uint8_t module = 1; module <= MAX_CELL_MODULES; module++){
         if(_checkModule(module)){
             _modules_data.moduleonline[lane][module] = true;          //module is online
@@ -50,7 +50,7 @@ bool Cellmodules::getDataFromModules() {
     return true;
     }
 
-bool Cellmodules::getDataFromModulesSingle() {
+bool Cellmodules::getDataFromModulesSingle(boolean fullData) {
     //temporary variables to count modules available. Copy it after last module into storage to read
     static uint16_t modulesavailable = 0;
     static uint16_t modulesnotavailable = 0;
@@ -77,7 +77,10 @@ bool Cellmodules::getDataFromModulesSingle() {
 
     //read one module (modulesavailable and modulesnotavailable will be updated there)
     _readCellModule(_modules_data.indexLane, _modules_data.indexModule, modulesavailable, modulesnotavailable); 
-
+    if (fullData) {
+        _readCellModuleCalibration(_modules_data.indexLane, _modules_data.indexModule);
+        }
+        
     //calculating some data such as mean temperature or voltage delta or min/max values
     _calculateCellStateValues();
 
@@ -153,8 +156,6 @@ bool Cellmodules::_readCellModule(uint8_t lane, uint8_t address, uint16_t &modul
         }
 
     //Serial.println("Cell Module "+String(address)+": "+String(_modules_data.cellbalancecurrentsetpoint[address]*1000.0) );
-
-    _readCellModuleCalibration(lane, address);
 
     return true;
     }

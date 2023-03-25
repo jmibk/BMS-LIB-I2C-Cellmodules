@@ -41,14 +41,14 @@ void loop() {
 
   Serial.println("Index  : "+String(battery._modules_data.indexLane)+"/"+String(battery._modules_data.indexModule));
 
-  battery.set_locate(1, true);
+  //battery.set_locate(1, true);
 
   Serial.println("Reading data from cell modules");
 
   Serial.println("Modules available: "+String(battery.get_modulesavailable()));
   Serial.println("Modules failed: "+String(battery.get_modulesnotavailable()));
+/*
   Serial.println("CRC Errors: "+String(battery.get_crcerrors()));
-
   Serial.println("lowest V: "+String(battery.get_lowestcellvoltage(),3));
   Serial.println("Number: "+String(battery.get_lowestcellvoltagenumber()));
   Serial.println("highest V: "+String(battery.get_highestcellvoltage(),3));
@@ -60,19 +60,21 @@ void loop() {
 
   Serial.println("Battery V: "+String(battery.get_batteryvoltage(),3));
   Serial.println("Mean Temperature: "+String(battery.get_meancelltemperature(),1));
-
-  battery.scanBusForModules(); 
-  for (uint8_t i = 0; i <= 200; i++){
+*/
+/*
+  battery.scanForModules(); 
+  for (uint8_t i = 0; i <= 127; i++){
       if (battery.get_moduleonline(i))
           Serial.println("found module "+String(i));
       }
-/*
+*/
   for (uint8_t i = 1; i <= 16; i++){
+    Serial.println("Module "+String(i)+": "+String(battery.get_moduleonline(i)));
     uint32_t temp = battery.get_cellerrorregister(i);
     if (temp)
       Serial.println("Error Register "+String(i)+": "+String(temp, BIN));
     }
-
+/*
   //config test
   byte address = 16;
   //battery.calibratemodule(VOLTAGE, address, 0.019);    //ADDRESS, VOLTAGE, CURRENT, TEMPERATURE; cellmodule; value in SI
@@ -82,6 +84,6 @@ void loop() {
   Serial.println("Calibration Data CURRENT: "+String(battery.getcalibrationdata(CURRENT, address),3)+" A, "+String(battery.get_cellbalancecurrent(address),3)+" A");
   Serial.println("Calibration Data TEMPERATURE: "+String(battery.getcalibrationdata(TEMPERATURE, address),1)+" degC, "+String(battery.get_celltemperature(address),1)+" degC");
 */
-  //delay(200);
-  //Serial.println("");
+  delay(1000);
+  Serial.println("");
   }

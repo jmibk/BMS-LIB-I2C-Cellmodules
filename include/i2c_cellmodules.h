@@ -159,7 +159,7 @@ class Cellmodules {
         uint8_t         highestcelltemperaturenumber = 0; 
         float           batteryvoltage = 51.2;
         float           meancelltemperature = 24;
-	float           batterydeltavoltage = 0;
+		float           batterydeltavoltage = 0;
         uint16_t        modulesavailable = 16;                                                          //cellmodules that can be communicated with
         uint16_t        modulesnotavailable = 0;                                                        //cellmodules that are missing for communication
         uint32_t        crcerrors = 0;                                                                  //crc communication errors since system start

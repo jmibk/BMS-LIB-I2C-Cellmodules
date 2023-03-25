@@ -1,3 +1,14 @@
+/*
+current request time: 
+79ms @Speed = 1.000   => max 100 boards
+87ms @Speed = 5.000   => max 90 boards
+44ms @Speed = 10.000  => max 180 boards
+15ms @Speed = 50.000  => max 530 boards
+11ms @Speed = 100.000 => max 720 boards
+
+2ms if no board is there
+*/
+
 #include <Arduino.h>
 #include "i2c_cellmodules.h"
 
@@ -9,19 +20,28 @@ void setup() {
   Serial.println("Demo - Cellmodules over I2C");
  
   //init i2c
-  if (battery.init(13, 16))  //SDA, SCL
+  if (battery.init(13, 16, 5000))  //SDA, SCL
     Serial.println("cellmodules initialised");
   else
     Serial.println("cellmodules failed!");
+
+  //set modes and so on
+  //battery.set_batterymode(ALLSERIAL);     //ALLSERIAL, PARALLEL
+  battery.set_numberofmodules(1, 2);      //set 16 cells on lane 1
+  //battery.set_numberofmodules(2,  4);      //set 0 cells on lane 2
+  //battery.set_lanenumber(0);
 
   //get initial values from modules - at first start
   battery.getDataFromModules();
   }
 
-void loop() {
+void loop() { 
+  //battery
   battery.getDataFromModulesSingle();
 
-  battery.setLocate(14, true);
+  Serial.println("Index  : "+String(battery._modules_data.indexLane)+"/"+String(battery._modules_data.indexModule));
+
+  battery.set_locate(1, true);
 
   Serial.println("Reading data from cell modules");
 
@@ -41,7 +61,7 @@ void loop() {
   Serial.println("Battery V: "+String(battery.get_batteryvoltage(),3));
   Serial.println("Mean Temperature: "+String(battery.get_meancelltemperature(),1));
 
-  battery.scanBusForModules();
+  battery.scanBusForModules(); 
   for (uint8_t i = 0; i <= 200; i++){
       if (battery.get_moduleonline(i))
           Serial.println("found module "+String(i));
@@ -62,7 +82,6 @@ void loop() {
   Serial.println("Calibration Data CURRENT: "+String(battery.getcalibrationdata(CURRENT, address),3)+" A, "+String(battery.get_cellbalancecurrent(address),3)+" A");
   Serial.println("Calibration Data TEMPERATURE: "+String(battery.getcalibrationdata(TEMPERATURE, address),1)+" degC, "+String(battery.get_celltemperature(address),1)+" degC");
 */
-  delay(200);
-  Serial.println("");
-
+  //delay(200);
+  //Serial.println("");
   }

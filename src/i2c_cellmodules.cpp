@@ -156,7 +156,7 @@ bool Cellmodules::_readCellModule(uint8_t lane, uint8_t address, uint16_t &modul
         }
 
 	//is system balancing?
-	if (_modules_data.cellbalancecurrent[lane][address])
+	if (_modules_data.cellbalancecurrent[lane][address] > 1)
 		_modules_data.cellbalanceenabled[lane][address] = true;
 		
     //Serial.println("Cell Module "+String(address)+": "+String(_modules_data.cellbalancecurrentsetpoint[address]*1000.0) );

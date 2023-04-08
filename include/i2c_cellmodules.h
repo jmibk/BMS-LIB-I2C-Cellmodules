@@ -6,6 +6,7 @@ uses i2c channel 0
 #include <Arduino.h>
 #include <Wire.h>
 
+#define TCA_ADDRESS         112
 #define USED_I2C_HARDWARE   1
 #define I2C_SPEED           1000ul
 #define MAX_CELL_MODULES    127
@@ -39,47 +40,49 @@ class Cellmodules {
         //new
         bool scanForModules(uint8_t lane);
         bool getDataFromModules(void);
-        bool getDataFromModulesSingle(void)                                 {return getDataFromModulesSingle(true);}            //catches also calibration data
+        bool getDataFromModulesSingle(void)                                     {return getDataFromModulesSingle(true);}            //catches also calibration data
         bool getDataFromModulesSingle(boolean fullData);                                                                        //catches calibration data true/false
 
 /*DEPRICATED*/
         //old
-        bool scanForModules(void)                                           {return scanForModules(1);}
+        bool scanForModules(void)                                               {return scanForModules(1);}
 /*DEPRICATED END*/
 
-        void set_batterymode(batteryConfig config)                          {_modules_data.battery_config = config;}                                           
-        void set_lanenumber(uint8_t value)                                  {_modules_data.current_lane = value;}                  //set current lane number to compute
-        uint8_t get_lanenumber(void)                                        {return _modules_data.current_lane;}                   //get current lane number that is processed at the moment
-        
+        void set_batterymode(batteryConfig config)                              {_modules_data.battery_config = config;}                                           
+ 
         //new      
-        void set_numberofmodules(uint8_t lane, uint8_t value)               {_modules_data.numberofmodules[lane] = value;}  
-        uint8_t get_numberofmodules(uint8_t lane)                           {return _modules_data.numberofmodules[lane];}
+        void set_numberofmodules(uint8_t lane, uint8_t value)                   {_modules_data.numberofmodules[lane] = value;}                                                                                       
+        uint8_t get_numberofmodules(uint8_t lane)                               {return _modules_data.numberofmodules[lane];}
 
 /*DEPRICATED*/
         //old
-        void set_numberofmodules(uint8_t value)                             {set_numberofmodules(1, value);}  
-        uint8_t get_numberofmodules(void)                                   {return get_numberofmodules(1);}
+        void set_numberofmodules(uint8_t value)                                 {set_numberofmodules(1, value);}                                                                               
+        uint8_t get_numberofmodules(void)                                       {return get_numberofmodules(1);}
 /*DEPRICATED END*/
 
         //global module data
-        uint16_t get_modulesavailable(void)                                 {return _modules_data.modulesavailable;}
-        uint16_t get_modulesnotavailable(void)                              {return _modules_data.modulesnotavailable;}
-        uint32_t get_crcerrors(void)                                        {return _modules_data.crcerrors;}
+        uint16_t get_modulesavailable(void)                                     {return _modules_data.modulesavailable;}
+        uint16_t get_modulesnotavailable(void)                                  {return _modules_data.modulesnotavailable;}
+        uint32_t get_crcerrors(void)                                            {return _modules_data.crcerrors;}
 
-        float get_lowestcellvoltage(void)                                   {return _modules_data.lowestcellvoltage;}
-        uint8_t get_lowestcellvoltagenumber(void)                           {return _modules_data.lowestcellvoltagenumber;}
-        float get_highestcellvoltage(void)                                  {return _modules_data.highestcellvoltage;}
-        uint8_t get_highestcellvoltagenumber(void)                          {return _modules_data.highestcellvoltagenumber;}
-        float get_lowestcelltemperature(void)                               {return _modules_data.lowestcelltemperature;}
-        uint8_t get_lowestcelltemperaturenumber(void)                       {return _modules_data.lowestcelltemperaturenumber;}
-        float get_highestcelltemperature(void)                              {return _modules_data.highestcelltemperature;}
-        uint8_t get_highestcelltemperaturenumber(void)                      {return _modules_data.highestcelltemperaturenumber;}
-        float get_batteryvoltage(void)                                      {return _modules_data.batteryvoltage;}
-        float get_batteryvoltage(uint8_t lane)                              {return _modules_data.lane_voltage[lane];}
-        float get_meancelltemperature(void)                                 {return _modules_data.meancelltemperature;}
-	float get_batterydeltavoltage(void)                                 {return _modules_data.batterydeltavoltage;}
+        float get_lowestcellvoltage(void)                                       {return _modules_data.lowestcellvoltage;}
+        uint8_t get_lowestcellvoltagenumber(void)                               {return _modules_data.lowestcellvoltagenumber;}
+        float get_highestcellvoltage(void)                                      {return _modules_data.highestcellvoltage;}
+        uint8_t get_highestcellvoltagenumber(void)                              {return _modules_data.highestcellvoltagenumber;}
+        float get_lowestcelltemperature(void)                                   {return _modules_data.lowestcelltemperature;}
+        uint8_t get_lowestcelltemperaturenumber(void)                           {return _modules_data.lowestcelltemperaturenumber;}
+        float get_highestcelltemperature(void)                                  {return _modules_data.highestcelltemperature;}
+        uint8_t get_highestcelltemperaturenumber(void)                          {return _modules_data.highestcelltemperaturenumber;}
+        float get_batteryvoltage(void)                                          {return _modules_data.batteryvoltage;}
+        float get_batteryvoltage(uint8_t lane)                                  {return _modules_data.lane_voltage[lane];}
+        float get_meancelltemperature(void)                                     {return _modules_data.meancelltemperature;}
+	float get_batterydeltavoltage(void)                                     {return _modules_data.batterydeltavoltage;}
 
         //module data
+        void set_lane_index(uint8_t lane)                                       {_modules_data.indexLane = constrain(lane,1,8);}
+        uint8_t get_lane_index(void)                                            {return _modules_data.indexLane;}
+        uint8_t get_module_index(void)                                          {return _modules_data.indexModule;}
+
         //new
         void set_cellbalancecurrentsetpoint(uint8_t lane, float value);                   //set balacing current to all modules
         void set_cellbalancecurrentsetpointsingle(uint8_t lane, uint8_t address, float value)   {if(address < MAX_CELL_MODULES) _modules_data.cellbalancecurrentsetpoint[lane][address] = value;}
@@ -134,9 +137,15 @@ class Cellmodules {
         bool get_locate(uint8_t address)                                                     {return get_locate(1, address);}
 /*DEPRICATED END*/
 
-//    private:
+/*TCA9548A STUFF*/
+        bool TCA_isready(void);  
+        bool TCA_setlane(uint8_t lane);
+        uint8_t TCA_getlane(void);
+
+bool _checkModule(uint8_t i2cAddress);
+    private:
         TwoWire _i2c = TwoWire(USED_I2C_HARDWARE);
-        bool _checkModule(byte i2cAddress);
+        
         bool _readCellModule(uint8_t lane, uint8_t address, uint16_t &modulesavailable, uint16_t &modulesnotavailable);         //reads regular values from module
         bool _readCellModuleCalibration(uint8_t lane, uint8_t address);             //reads calibration data from module
         void _calculateCellStateValues(void);
@@ -146,7 +155,6 @@ class Cellmodules {
     struct modules_data_struct { 
         uint8_t         numberofmodules[MAX_LANES+1];                                                   //number of cell modules
         batteryConfig   battery_config = PARALLEL;                                                      //battery configuration SERAL or PARALLEL
-        uint8_t         current_lane = 0;                                                               //current lane that is processed
 
         //data on whole battery
         float           lowestcellvoltage = 9999;
@@ -159,7 +167,7 @@ class Cellmodules {
         uint8_t         highestcelltemperaturenumber = 0; 
         float           batteryvoltage = 51.2;
         float           meancelltemperature = 24;
-		float           batterydeltavoltage = 0;
+	float           batterydeltavoltage = 0;
         uint16_t        modulesavailable = 16;                                                          //cellmodules that can be communicated with
         uint16_t        modulesnotavailable = 0;                                                        //cellmodules that are missing for communication
         uint32_t        crcerrors = 0;                                                                  //crc communication errors since system start
@@ -190,14 +198,14 @@ class Cellmodules {
         float           calibration_voltage[MAX_LANES+1][MAX_CELL_MODULES+1];        			          //voltage to calibrate
         float           calibration_current[MAX_LANES+1][MAX_CELL_MODULES+1];        			          //current to calibrate
         float           calibration_temperature[MAX_LANES+1][MAX_CELL_MODULES+1];    			          //temperature to calibrate
-		uint16_t        calibration_current_compensation[MAX_LANES+1][MAX_CELL_MODULES+1];   	          //discharge current compensation to calibrate
-		uint16_t        calibration_current_missmatch_time[MAX_LANES+1][MAX_CELL_MODULES+1]; 	          //discharge current missmatch timer
-		uint8_t        	calibration_current_regulation_step[MAX_LANES+1][MAX_CELL_MODULES+1]; 	          //discharge current regulation step
-		float       	calibration_current_deviation[MAX_LANES+1][MAX_CELL_MODULES+1]; 			      //max allowable current deviation while discharging
-		float       	calibration_current_maximum[MAX_LANES+1][MAX_CELL_MODULES+1]; 			          //max allowable current for discharge current
+	uint16_t        calibration_current_compensation[MAX_LANES+1][MAX_CELL_MODULES+1];   	          //discharge current compensation to calibrate
+	uint16_t        calibration_current_missmatch_time[MAX_LANES+1][MAX_CELL_MODULES+1]; 	          //discharge current missmatch timer
+	uint8_t        	calibration_current_regulation_step[MAX_LANES+1][MAX_CELL_MODULES+1]; 	          //discharge current regulation step
+	float       	calibration_current_deviation[MAX_LANES+1][MAX_CELL_MODULES+1]; 			      //max allowable current deviation while discharging
+	float       	calibration_current_maximum[MAX_LANES+1][MAX_CELL_MODULES+1]; 			          //max allowable current for discharge current
         bool            locate_module[MAX_LANES+1][MAX_CELL_MODULES+1];              			          //locate enabled?
     };
     modules_data_struct _modules_data;
-private:
+
 };
 #endif

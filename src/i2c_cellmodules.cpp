@@ -2,7 +2,7 @@
 
 //constructor - does nothing
 Cellmodules::Cellmodules(void) {
-    _modules_data.numberofmodules[1] = 16;          //set 16 cells on lane 1 as fdefault
+    //_modules_data.numberofmodules[1] = 16;          //set 16 cells on lane 1 as default
     }
 
 bool Cellmodules::init(int pinSDA, int pinSCL, uint32_t speed) {
@@ -37,17 +37,56 @@ bool Cellmodules::scanForModules(uint8_t lane){
     return true;
     }
 
+uint16_t Cellmodules::get_numberofmodules_total(void) {
+    uint16_t sum_of_modules = 0;
+    for (uint8_t lane; lane <= MAX_LANES; lane++) {
+        sum_of_modules += _modules_data.numberofmodules[lane];
+        }
+    return sum_of_modules;
+    }
+
 bool Cellmodules::getDataFromModules() {
     //reset values: cellmodule communication states
     _modules_data.modulesavailable = 0;              
     _modules_data.modulesnotavailable = 0;
 
-    //gather all data from all cell modules first
-    for (uint8_t lane = 1; lane < MAX_LANES; lane++){ 
-        for (uint8_t address = 1; address <= _modules_data.numberofmodules[lane]; address++){ 
-            Serial.println("Read Module Lane: "+String(lane)+", Module: "+String(address));
-            _readCellModule(lane, address, _modules_data.modulesavailable, _modules_data.modulesnotavailable); //lane, address, <pointers>
+    _modules_data.indexLane = 0;
+    _modules_data.indexModule = 0;
+
+    Serial.println("Total Number Of Modules: "+String(get_numberofmodules_total()));
+
+    for (uint16_t module = 0; module < get_numberofmodules_total(); module++) {     //iterate the number od modules
+/*MODULE AND LANE INDEX*/
+
+        //first, increase the module index for this round
+        _modules_data.indexModule++;
+
+        //check if current indexes are valid
+        if ( (_modules_data.numberofmodules[_modules_data.indexLane] != 0) && (_modules_data.numberofmodules[_modules_data.indexLane] >= _modules_data.indexModule) ) {
+            //all ok, continue: there should be a module
             }
+        else { //there is no module, select the next valid module space
+            //first, increase the lane index
+            uint8_t overflow_protection = 0;
+            while (_modules_data.numberofmodules[++_modules_data.indexLane] == 0) {
+                //watch out that there are not too many loops and the software hangs in the loop
+                if (overflow_protection++ > 20) break;
+
+                //if lane number overflows, reset to 1
+                if (_modules_data.indexLane > MAX_LANES) {
+                        _modules_data.indexLane = 1;
+                    }
+                }
+
+            //then, reset the module index to 1
+            _modules_data.indexModule = 1;
+            }
+
+/*MODULE AND LANE INDEX END*/
+
+        //Serial.println("Read Module Lane: "+String(_modules_data.indexLane)+", Module: "+String(_modules_data.indexModule));
+        _readCellModule(_modules_data.indexLane, _modules_data.indexModule, _modules_data.modulesavailable, _modules_data.modulesnotavailable); //lane, address, <pointers>
+        _readCellModuleCalibration(_modules_data.indexLane, _modules_data.indexModule);
         }
     
     //calculating some data such as mean temperature or voltage delta or min/max values
@@ -61,17 +100,33 @@ bool Cellmodules::getDataFromModulesSingle(boolean fullData) {
     static uint16_t modulesavailable = 0;
     static uint16_t modulesnotavailable = 0;
 
-    //check indexes
-    //increase module index, if it is too high, increase lane index and check if there are modules configured
-    if (++_modules_data.indexModule > _modules_data.numberofmodules[_modules_data.indexLane]) {
-        _modules_data.indexModule = 1;
+/*MODULE AND LANE INDEX*/
 
-        while (_modules_data.numberofmodules[++_modules_data.indexLane] == 0)
-            if (_modules_data.indexLane > MAX_LANES){
-                _modules_data.indexLane = 1;
-                break;
+    //first, increase the module index for this round
+    _modules_data.indexModule++;
+
+    //check if current indexes are valid
+    if ( (_modules_data.numberofmodules[_modules_data.indexLane] != 0) && (_modules_data.numberofmodules[_modules_data.indexLane] >= _modules_data.indexModule) ) {
+        //all ok, continue: there should be a module
+        }
+    else { //there is no module, select the next valid module space
+        //first, increase the lane index
+        uint8_t overflow_protection = 0;
+        while (_modules_data.numberofmodules[++_modules_data.indexLane] == 0) {
+            //watch out that there are not too many loops and the software hangs in the loop
+            if (overflow_protection++ > 20) break;
+
+            //if lane number overflows, reset to 1
+            if (_modules_data.indexLane > MAX_LANES) {
+                    _modules_data.indexLane = 1;
                 }
             }
+
+        //then, reset the module index to 1
+        _modules_data.indexModule = 1;
+        }
+
+/*MODULE AND LANE INDEX END*/
 
     //reset values: cellmodule communication states if module index  is 1 (starting)
     if ((_modules_data.indexModule == 1) && (_modules_data.indexLane == 1)) {

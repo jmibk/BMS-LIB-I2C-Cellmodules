@@ -48,6 +48,7 @@ class Cellmodules {
         bool scanForModules(void)                                               {return scanForModules(1);}
 /*DEPRICATED END*/
 
+        uint16_t get_numberofmodules_total(void);
         void set_batterymode(batteryConfig config)                              {_modules_data.battery_config = config;}                                           
  
         //new      

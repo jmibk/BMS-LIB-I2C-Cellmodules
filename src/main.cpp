@@ -26,7 +26,7 @@ void setup() {
     Serial.println("cellmodules failed!");
 
   //set modes and so on
-  //battery.set_batterymode(ALLSERIAL);      //ALLSERIAL, PARALLEL
+  battery.set_batterymode(ALLSERIAL);        //ALLSERIAL, PARALLEL
   battery.set_numberofmodules(3, 6);         //set 6 cells on lane 2 [1...8]
   battery.set_numberofmodules(7,  16);       //set 10 cells on lane 6 [1...8]
 
@@ -60,21 +60,21 @@ void loop() {
 #ifndef GET_MODULE_DATA
 
   battery.getDataFromModulesSingle();
+  Serial.print("Module Lane: "+String(battery.get_lane_index())+" Nr: "+String(battery.get_module_index())+": ");
   if (battery.get_moduleonline(battery.get_lane_index(), battery.get_module_index()))
-    Serial.println("Module ONLINE");
+    Serial.println("ONLINE");
   else  
-    Serial.println("Module OFFLINE");
+    Serial.println("OFFLINE");
 
 #endif
 
 
-  //battery.set_locate(1, true);
+//battery.set_locate(1, true);
 
-//  Serial.println("Reading data from cell modules");
-
-  //Serial.println("Modules available: "+String(battery.get_modulesavailable()));
- // Serial.println("Modules failed: "+String(battery.get_modulesnotavailable()));
 /*
+Serial.println("Modules available: "+String(battery.get_modulesavailable()));
+Serial.println("Modules failed: "+String(battery.get_modulesnotavailable()));
+
   Serial.println("CRC Errors: "+String(battery.get_crcerrors()));
   Serial.println("lowest V: "+String(battery.get_lowestcellvoltage(),3));
   Serial.println("Number: "+String(battery.get_lowestcellvoltagenumber()));
@@ -87,8 +87,7 @@ void loop() {
 
   Serial.println("Battery V: "+String(battery.get_batteryvoltage(),3));
   Serial.println("Mean Temperature: "+String(battery.get_meancelltemperature(),1));
-*/
-
+/*
 
 
 /*
@@ -103,5 +102,4 @@ void loop() {
   Serial.println("Calibration Data TEMPERATURE: "+String(battery.getcalibrationdata(TEMPERATURE, address),1)+" degC, "+String(battery.get_celltemperature(address),1)+" degC");
 */
   delay(1000);
-  Serial.println("");
   }

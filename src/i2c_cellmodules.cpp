@@ -421,6 +421,10 @@ bool Cellmodules::calibratemodule(configValue config, uint8_t lane, uint8_t addr
     if(address > MAX_CELL_MODULES) 
         return false;
 
+	//switch lane if needed    
+    if (lane != TCA_getlane()) 
+        TCA_setlane(lane);
+	
     //check if module is there
     if (!_checkModule(address))
         return false;
@@ -502,6 +506,10 @@ float Cellmodules::get_calibrationdata(configValue config, uint8_t lane, uint8_t
     if(address > MAX_CELL_MODULES) 
         return false;
 
+	//switch lane if needed    
+    if (lane != TCA_getlane()) 
+        TCA_setlane(lane);
+	
     //check if module is there
     if (!_checkModule(address))
         return 0xFFFF;

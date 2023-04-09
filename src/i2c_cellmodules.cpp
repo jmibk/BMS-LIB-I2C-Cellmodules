@@ -29,8 +29,8 @@ bool Cellmodules::scanForModules(void){
 	
 bool Cellmodules::scanForModules(uint8_t lane){
     //switch lane if needed    
-    if (lane != TCA_getlane()) 
-        TCA_setlane(lane);
+    if (lane != mux_getlane()) 
+        mux_setlane(lane);
 
     //scan for modules
     for (uint8_t address = 1; address <= MAX_CELL_MODULES; address++){
@@ -140,6 +140,9 @@ bool Cellmodules::getDataFromModulesSingle(boolean fullData) {
             //if lane number overflows, reset to 1
             if (_modules_data.indexLane > MAX_LANES) {
                     _modules_data.indexLane = 1;
+					//reset also modulesavailable
+					
+					//
                 }
             }
 
@@ -193,8 +196,8 @@ void Cellmodules::set_cellbalancecurrentsetpoint(float value){
 //read single cell module
 bool Cellmodules::_readCellModule(uint8_t lane, uint8_t address, uint16_t &modulesavailable, uint16_t &modulesnotavailable) {
     //switch lane if needed
-    if (lane != TCA_getlane()) 
-        TCA_setlane(constrain(lane,0,7));
+    if (lane != mux_getlane()) 
+        mux_setlane(constrain(lane,0,7));
     
     //reset values: cell module and master error
     _modules_data.cellerrorregister[lane][address] = 0x000000;
@@ -413,8 +416,8 @@ bool Cellmodules::_writedata(uint8_t lane, int i2cAddress, byte i2cRegister, uin
         return false;
 
     //switch lane if needed
-    if (lane != TCA_getlane()) 
-        TCA_setlane(lane);
+    if (lane != mux_getlane()) 
+        mux_setlane(lane);
 
     //read data
     uint16_t crc = ( i2cRegister + (data >> 8) + (data >> 0) ) % 256;
@@ -439,8 +442,8 @@ bool Cellmodules::calibratemodule(configValue config, uint8_t lane, uint8_t addr
         return false;
 
 	//switch lane if needed    
-    if (lane != TCA_getlane()) 
-        TCA_setlane(lane);
+    if (lane != mux_getlane()) 
+        mux_setlane(lane);
 	
     //check if module is there
     if (!_checkModule(address))
@@ -524,8 +527,8 @@ float Cellmodules::get_calibrationdata(configValue config, uint8_t lane, uint8_t
         return false;
 
 	//switch lane if needed    
-    if (lane != TCA_getlane()) 
-        TCA_setlane(lane);
+    if (lane != mux_getlane()) 
+        mux_setlane(lane);
 	
     //check if module is there
     if (!_checkModule(address))
@@ -590,8 +593,8 @@ bool Cellmodules::set_locate(uint8_t lane, uint8_t address, bool state){
 
 uint16_t Cellmodules::_readdata(uint8_t lane, int i2cAddress, byte i2cRegister) {
     //switch lane if needed
-    if (lane != TCA_getlane()) 
-        TCA_setlane(constrain(lane,0,7));
+    if (lane != mux_getlane()) 
+        mux_setlane(constrain(lane,0,7));
 
     //first tell the module which data has to be read from it
     _i2c.beginTransmission(i2cAddress);                   //queuing the slave address
@@ -624,7 +627,7 @@ uint16_t Cellmodules::_readdata(uint8_t lane, int i2cAddress, byte i2cRegister) 
 
 /*TCA9548A Stuff*/
 
-bool Cellmodules::TCA_setlane(uint8_t lane) {
+bool Cellmodules::mux_setlane(uint8_t lane) {
     if (!_checkModule(TCA_ADDRESS)) 
         return false;
 
@@ -635,7 +638,7 @@ bool Cellmodules::TCA_setlane(uint8_t lane) {
 	return true;
     }
 
-uint8_t Cellmodules::TCA_getlane(void) {
+uint8_t Cellmodules::mux_getlane(void) {
     if (!_checkModule(TCA_ADDRESS)) 
         return 255;
 

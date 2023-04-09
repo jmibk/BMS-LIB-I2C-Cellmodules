@@ -145,9 +145,9 @@ class Cellmodules {
 /*DEPRICATED END*/
 
 /*TCA9548A STUFF*/
-        bool TCA_isready(void);  
-        bool TCA_setlane(uint8_t lane);
-        uint8_t TCA_getlane(void);
+        bool mux_isready(void);  
+        bool mux_setlane(uint8_t lane);
+        uint8_t mux_getlane(void);
 
 bool _checkModule(uint8_t i2cAddress);
     private:

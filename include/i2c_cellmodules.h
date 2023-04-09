@@ -38,14 +38,16 @@ class Cellmodules {
         bool init(void); 
 
         //new
+		bool scanForModules(void);
         bool scanForModules(uint8_t lane);
         bool getDataFromModules(void);
         bool getDataFromModulesSingle(void)                                     {return getDataFromModulesSingle(true);}            //catches also calibration data
         bool getDataFromModulesSingle(boolean fullData);                                                                        //catches calibration data true/false
 
 /*DEPRICATED*/
-        //old
-        bool scanForModules(void)                                               {return scanForModules(1);}
+        /*
+        //bool scanForModules(void)                                               {return scanForModules(1);}
+		*/
 /*DEPRICATED END*/
 
         uint16_t get_numberofmodules_total(void);				//returns the number of modules in the whole system
@@ -58,9 +60,10 @@ class Cellmodules {
         uint8_t get_numberofmodules(uint8_t lane)                               {return _modules_data.numberofmodules[lane];}
 
 /*DEPRICATED*/
-        //old
+        /*
         void set_numberofmodules(uint8_t value)                                 {set_numberofmodules(1, value);}                                                                               
         uint8_t get_numberofmodules(void)                                       {return get_numberofmodules(1);}
+		*/
 /*DEPRICATED END*/
 
         //global module data
@@ -102,7 +105,7 @@ class Cellmodules {
 	void set_cellcrcerrors(uint8_t lane, uint8_t address, uint32_t value)               {if(address < MAX_CELL_MODULES)  _modules_data.cellcrcerrors[lane][address] = value;}
 
 /*DEPRICATED*/
-        //old
+        /*
         void set_cellbalancecurrentsetpoint(float value)                                    {set_cellbalancecurrentsetpoint(1, value);}
         void set_cellbalancecurrentsetpointsingle(uint8_t address, float value)             {set_cellbalancecurrentsetpointsingle(1, address, value);}
         void set_cellbalanceenabled(uint8_t address, bool value)                            {set_cellbalanceenabled(1, address, value);}
@@ -116,28 +119,29 @@ class Cellmodules {
         uint32_t get_cellerrorregister(uint8_t address)                                     {return get_cellerrorregister(1, address);}
         uint32_t get_cellcrcerrors(uint8_t address)                                         {return get_cellcrcerrors(1, address);}
 	void set_cellcrcerrors(uint8_t address, uint32_t value)                             {set_cellcrcerrors(1, address, value);}
+	*/
 /*DEPRICATED END*/
      
 		//calibration
-        //new
         bool calibratemodule(configValue config, uint8_t lane, uint8_t address, float value);
         float get_calibrationdata(configValue config, uint8_t lane, uint8_t address);
 
 /*DEPRICATED*/
-        //old
+        /*
         bool calibratemodule(configValue config, uint8_t address, float value)              {return calibratemodule(config, 1, address, value);}
         float get_calibrationdata(configValue config, uint8_t address)                      {return get_calibrationdata(config, 1, address);}
+		*/
 /*DEPRICATED END*/
 
         //locate function
-        //new
         bool set_locate(uint8_t lane, uint8_t address, bool state);
         bool get_locate(uint8_t lane, uint8_t address)                                       {if(address < MAX_CELL_MODULES) return _modules_data.locate_module[lane][address]; return false;}
 
 /*DEPRICATED*/
-        //old
+        /*
         bool set_locate(uint8_t address, bool state)                                         {return set_locate(1, address, state);}
         bool get_locate(uint8_t address)                                                     {return get_locate(1, address);}
+		*/
 /*DEPRICATED END*/
 
 /*TCA9548A STUFF*/

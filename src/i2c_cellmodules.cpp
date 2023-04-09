@@ -20,6 +20,13 @@ bool Cellmodules::init(void) {
     return init(13, 16);
     }
 
+bool Cellmodules::scanForModules(void){
+	for (uint8_t lane = 1; lane <= MAX_LANES; lane++) {
+		scanForModules(lane);
+		}
+	return true;
+	}	
+	
 bool Cellmodules::scanForModules(uint8_t lane){
     //switch lane if needed    
     if (lane != TCA_getlane()) 

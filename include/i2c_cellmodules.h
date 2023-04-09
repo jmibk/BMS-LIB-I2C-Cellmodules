@@ -49,7 +49,8 @@ class Cellmodules {
 /*DEPRICATED END*/
 
         uint16_t get_numberofmodules_total(void);
-        void set_batterymode(batteryConfig config)                              {_modules_data.battery_config = config;}                                           
+        void set_batterymode(batteryConfig config)                              {_modules_data.battery_config = config;} 
+		batteryConfig get_batterymode(void)										{return _modules_data.battery_config;}
  
         //new      
         void set_numberofmodules(uint8_t lane, uint8_t value)                   {_modules_data.numberofmodules[lane] = value;}                                                                                       

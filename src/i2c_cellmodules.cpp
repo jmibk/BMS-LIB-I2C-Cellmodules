@@ -627,8 +627,14 @@ uint16_t Cellmodules::_readdata(uint8_t lane, int i2cAddress, byte i2cRegister) 
 
 /*TCA9548A Stuff*/
 
-bool Cellmodules::mux_setlane(uint8_t lane) {
+bool Cellmodules::mux_isready(void) {
     if (!_checkModule(TCA_ADDRESS)) 
+        return false;
+	return true;
+	}
+
+bool Cellmodules::mux_setlane(uint8_t lane) {
+    if (!mux_isready()) 
         return false;
 
     uint8_t _channel = constrain( (lane-1), 0, 7);
@@ -639,7 +645,7 @@ bool Cellmodules::mux_setlane(uint8_t lane) {
     }
 
 uint8_t Cellmodules::mux_getlane(void) {
-    if (!_checkModule(TCA_ADDRESS)) 
+    if (!mux_isready()) 
         return 255;
 
     byte inByte;

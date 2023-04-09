@@ -144,12 +144,12 @@ class Cellmodules {
 		*/
 /*DEPRICATED END*/
 
-/*TCA9548A STUFF*/
         bool mux_isready(void);  
         bool mux_setlane(uint8_t lane);
         uint8_t mux_getlane(void);
 
-bool _checkModule(uint8_t i2cAddress);
+		bool _checkModule(uint8_t i2cAddress);
+		
     private:
         TwoWire _i2c = TwoWire(USED_I2C_HARDWARE);
         

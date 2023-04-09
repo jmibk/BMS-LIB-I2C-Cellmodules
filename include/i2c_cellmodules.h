@@ -90,7 +90,7 @@ class Cellmodules {
         uint8_t get_module_index(void)                                          {return _modules_data.indexModule;}
 
         //new
-        void set_cellbalancecurrentsetpoint(uint8_t lane, float value);                   //set balacing current to all modules
+        void set_cellbalancecurrentsetpoint(float value);                   	//set balacing current to all modules
         void set_cellbalancecurrentsetpointsingle(uint8_t lane, uint8_t address, float value)   {if(address < MAX_CELL_MODULES) _modules_data.cellbalancecurrentsetpoint[lane][address] = value;}
         void set_cellbalanceenabled(uint8_t lane, uint8_t address, bool value)              {if(address < MAX_CELL_MODULES) _modules_data.cellbalanceenable[lane][address] = value;}
 

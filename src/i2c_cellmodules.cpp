@@ -173,11 +173,13 @@ bool Cellmodules::getDataFromModulesSingle(boolean fullData) {
     }
 
 //set balancing current to all modules
-void Cellmodules::set_cellbalancecurrentsetpoint(uint8_t lane, float value){
+void Cellmodules::set_cellbalancecurrentsetpoint(float value){
     //step throug every cell module to set discharge current
-    for (uint8_t address = 1; address <= _modules_data.numberofmodules[lane]; address++){
-        set_cellbalancecurrentsetpointsingle(lane, address, value);
-        }
+	for (uint8_t lane = 1; lane <= MAX_LANES; lane++) {
+		for (uint8_t address = 1; address <= _modules_data.numberofmodules[lane]; address++){
+			set_cellbalancecurrentsetpointsingle(lane, address, value);
+			}
+		}
     }
 
 //read single cell module

@@ -48,7 +48,8 @@ class Cellmodules {
         bool scanForModules(void)                                               {return scanForModules(1);}
 /*DEPRICATED END*/
 
-        uint16_t get_numberofmodules_total(void);
+        uint16_t get_numberofmodules_total(void);				//returns the number of modules in the whole system
+		uint16_t get_numberofmodules_stack(void);				//returns the maximum number of cells in series regaring configuration PARALLEL or ALLSERIAL
         void set_batterymode(batteryConfig config)                              {_modules_data.battery_config = config;} 
 		batteryConfig get_batterymode(void)										{return _modules_data.battery_config;}
  

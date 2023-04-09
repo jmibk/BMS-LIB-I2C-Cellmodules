@@ -44,6 +44,20 @@ uint16_t Cellmodules::get_numberofmodules_total(void) {
         }
     return sum_of_modules;
     }
+	
+uint16_t Cellmodules::get_numberofmodules_stack(void) {
+	//serial configuration: return number of all modules
+	if (_modules_data.battery_config == ALLSERIAL)
+		return get_numberofmodules_total();
+	
+	//parallel configuration: search the highest number in series and return
+	uint16_t maxModules = 0;
+	for (uint8_t lane; lane <= MAX_LANES; lane++) {
+		if (_modules_data.numberofmodules[lane] > maxModules)
+			maxModules = _modules_data.numberofmodules[lane];
+		}	
+	return maxModules;
+	}
 
 bool Cellmodules::getDataFromModules() {
     //reset values: cellmodule communication states

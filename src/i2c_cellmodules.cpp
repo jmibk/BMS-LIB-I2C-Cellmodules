@@ -150,7 +150,15 @@ bool Cellmodules::getDataFromModulesSingle(boolean fullData) {
 /*MODULE AND LANE INDEX END*/
 
     //reset values: cellmodule communication states if module index  is 1 (starting)
-    if ((_modules_data.indexModule == 1) && (_modules_data.indexLane == 1)) {
+	uint8_t first_indexLane = 1;		//find the first lane with configured modules
+	for (uint8_t lane = 1; lane <= MAX_LANES; lane++) {
+		if (_modules_data.numberofmodules[lane] > 0) {
+			first_indexLane = lane;
+			break;
+			}
+		}
+	
+    if ((_modules_data.indexLane == first_indexLane) && (_modules_data.indexModule == 1)) {
         _modules_data.modulesavailable = modulesavailable;              
         _modules_data.modulesnotavailable = modulesnotavailable;
         modulesavailable = 0;

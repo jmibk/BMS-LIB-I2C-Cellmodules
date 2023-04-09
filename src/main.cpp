@@ -27,8 +27,9 @@ void setup() {
 
   //set modes and so on
   battery.set_batterymode(ALLSERIAL);        //ALLSERIAL, PARALLEL
-  battery.set_numberofmodules(3, 6);         //set 6 cells on lane 2 [1...8]
-  battery.set_numberofmodules(7,  16);       //set 10 cells on lane 6 [1...8]
+  battery.set_numberofmodules(1, 16);         //set 6 cells on lane 2 [1...8]
+  //battery.set_numberofmodules(3, 6);         //set 6 cells on lane 2 [1...8]
+  //battery.set_numberofmodules(7,  16);       //set 10 cells on lane 6 [1...8]
 
   //get initial values from modules - at first start
   battery.getDataFromModules();
@@ -58,6 +59,10 @@ void loop() {
 #endif
   
 #ifndef GET_MODULE_DATA
+
+  //for (uint8_t lane = 1; lane <= 8; lane++) {
+  //  Serial.println("Lane Set "+String(lane)+": "+String(battery.get_numberofmodules(lane) ));
+  //  }
 
   battery.getDataFromModulesSingle();
   Serial.print("Module Lane: "+String(battery.get_lane_index())+" Nr: "+String(battery.get_module_index())+": ");

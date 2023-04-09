@@ -135,14 +135,13 @@ bool Cellmodules::getDataFromModulesSingle(boolean fullData) {
         uint8_t overflow_protection = 0;
         while (_modules_data.numberofmodules[++_modules_data.indexLane] == 0) {
             //watch out that there are not too many loops and the software hangs in the loop
-            if (overflow_protection++ > 20) break;
+            if (overflow_protection++ > MAX_LANES) {
+                break;
+                }   
 
             //if lane number overflows, reset to 1
             if (_modules_data.indexLane > MAX_LANES) {
-                    _modules_data.indexLane = 1;
-					//reset also modulesavailable
-					
-					//
+                _modules_data.indexLane = 0;
                 }
             }
 

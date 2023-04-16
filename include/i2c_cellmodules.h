@@ -36,6 +36,7 @@ class Cellmodules {
         bool init(int pinSDA, int pinSCL, uint32_t speed);
         bool init(int pinSDA, int pinSCL);
         bool init(void); 
+		void setModuleReadRetries(uint8_t value)								{_modules_data.moduleReadRetries = value;}		//sets the number of tries to reread a module if an error occours
 
         //new
 		bool scanForModules(void);
@@ -82,7 +83,7 @@ class Cellmodules {
         float get_batteryvoltage(void)                                          {return _modules_data.batteryvoltage;}
         float get_batteryvoltage(uint8_t lane)                                  {return _modules_data.lane_voltage[lane];}
         float get_meancelltemperature(void)                                     {return _modules_data.meancelltemperature;}
-	float get_batterydeltavoltage(void)                                     {return _modules_data.batterydeltavoltage;}
+	    float get_batterydeltavoltage(void)                                     {return _modules_data.batterydeltavoltage;}
 
         //module data
         void set_lane_index(uint8_t lane)                                       {_modules_data.indexLane = constrain(lane,1,8);}
@@ -162,6 +163,7 @@ class Cellmodules {
     struct modules_data_struct { 
         uint8_t         numberofmodules[MAX_LANES+1];                                                   //number of cell modules
         batteryConfig   battery_config = PARALLEL;                                                      //battery configuration SERAL or PARALLEL
+		uint8_t 		moduleReadRetries = 3;															//retries to read the module after communication fails
 
         //data on whole battery
         float           lowestcellvoltage = 9999;

@@ -106,8 +106,13 @@ bool Cellmodules::getDataFromModules() {
 /*MODULE AND LANE INDEX END*/
 
         //Serial.println("Read Module Lane: "+String(_modules_data.indexLane)+", Module: "+String(_modules_data.indexModule));
-        _readCellModule(_modules_data.indexLane, _modules_data.indexModule, _modules_data.modulesavailable, _modules_data.modulesnotavailable); //lane, address, <pointers>
-        _readCellModuleCalibration(_modules_data.indexLane, _modules_data.indexModule);
+		for (uint8_t moduleReadRetry = _modules_data.moduleReadRetries; moduleReadRetry > 0; moduleReadRetry--){
+			bool moduleState = false;
+			moduleState = _readCellModule(_modules_data.indexLane, _modules_data.indexModule, _modules_data.modulesavailable, _modules_data.modulesnotavailable); //lane, address, <pointers>
+			moduleState &= _readCellModuleCalibration(_modules_data.indexLane, _modules_data.indexModule);	//both must be true
+			if (moduleState)	//break if read was successfull
+				break;
+			}
         }
     
     //calculating some data such as mean temperature or voltage delta or min/max values
@@ -168,8 +173,10 @@ bool Cellmodules::getDataFromModulesSingle(boolean fullData) {
         }
 
     //read one module (modulesavailable and modulesnotavailable will be updated there)
-    _readCellModule(_modules_data.indexLane, _modules_data.indexModule, modulesavailable, modulesnotavailable); 
-
+	for (uint8_t moduleReadRetry = _modules_data.moduleReadRetries; moduleReadRetry > 0; moduleReadRetry--){
+		if (_readCellModule(_modules_data.indexLane, _modules_data.indexModule, modulesavailable, modulesnotavailable))
+			break;		//break if module read is successfull
+		}
     //Serial.println("Read Module Lane: "+String(_modules_data.indexLane)+", Module: "+String(_modules_data.indexModule));
 
     if (fullData) {

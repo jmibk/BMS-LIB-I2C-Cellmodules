@@ -176,7 +176,7 @@ bool Cellmodules::getDataFromModulesSingle(boolean fullData) {
 	for (uint8_t moduleReadRetry = _modules_data.moduleReadRetries; moduleReadRetry > 0; moduleReadRetry--){
 		if (_readCellModule(_modules_data.indexLane, _modules_data.indexModule, modulesavailable, modulesnotavailable))
 			break;		//break if module read is successfull
-		delay(500);
+		//delay(500);
 		}
     //Serial.println("Read Module Lane: "+String(_modules_data.indexLane)+", Module: "+String(_modules_data.indexModule));
 

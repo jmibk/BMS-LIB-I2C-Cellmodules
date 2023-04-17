@@ -2,7 +2,6 @@
 
 //constructor - does nothing
 Cellmodules::Cellmodules(void) {
-    //_modules_data.numberofmodules[1] = 16;          //set 16 cells on lane 1 as default
     }
 
 bool Cellmodules::init(int pinSDA, int pinSCL, uint32_t speed) {
@@ -20,99 +19,26 @@ bool Cellmodules::init(void) {
     return init(13, 16);
     }
 
-bool Cellmodules::scanForModules(void){
-	for (uint8_t lane = 1; lane <= MAX_LANES; lane++) {
-		scanForModules(lane);
-		}
-	return true;
-	}	
-	
-bool Cellmodules::scanForModules(uint8_t lane){
-    //switch lane if needed    
-    if (lane != mux_getlane()) 
-        mux_setlane(lane);
-
-    //scan for modules
-    for (uint8_t address = 1; address <= MAX_CELL_MODULES; address++){
-        if(_checkModule(address)){
-            _modules_data.moduleonline[lane][address] = true;          //module is online
+bool Cellmodules::scanBusForModules(void){
+    for (uint8_t module = 1; module <= MAX_CELL_MODULES; module++){
+        if(_checkModule(module)){
+            _modules_data.moduleonline[module] = true;          //module is online
 			}
         else {
-            _modules_data.moduleonline[lane][address] = false;         //module is offline
+            _modules_data.moduleonline[module] = false;         //module is offline
 			}
         }
     return true;
     }
 
-uint16_t Cellmodules::get_numberofmodules_total(void) {
-    uint16_t sum_of_modules = 0;
-    for (uint8_t lane; lane <= MAX_LANES; lane++) {
-        sum_of_modules += _modules_data.numberofmodules[lane];
-        }
-    return sum_of_modules;
-    }
-	
-uint16_t Cellmodules::get_numberofmodules_stack(void) {
-	//serial configuration: return number of all modules
-	if (_modules_data.battery_config == ALLSERIAL)
-		return get_numberofmodules_total();
-	
-	//parallel configuration: search the highest number in series and return
-	uint16_t maxModules = 0;
-	for (uint8_t lane; lane <= MAX_LANES; lane++) {
-		if (_modules_data.numberofmodules[lane] > maxModules)
-			maxModules = _modules_data.numberofmodules[lane];
-		}	
-	return maxModules;
-	}
-
-bool Cellmodules::getDataFromModules() {
+bool Cellmodules::getDataFromModules(void) {
     //reset values: cellmodule communication states
     _modules_data.modulesavailable = 0;              
     _modules_data.modulesnotavailable = 0;
 
-    _modules_data.indexLane = 0;
-    _modules_data.indexModule = 0;
-
-    Serial.println("Total Number Of Modules: "+String(get_numberofmodules_total()));
-
-    for (uint16_t module = 0; module < get_numberofmodules_total(); module++) {     //iterate the number od modules
-/*MODULE AND LANE INDEX*/
-
-        //first, increase the module index for this round
-        _modules_data.indexModule++;
-
-        //check if current indexes are valid
-        if ( (_modules_data.numberofmodules[_modules_data.indexLane] != 0) && (_modules_data.numberofmodules[_modules_data.indexLane] >= _modules_data.indexModule) ) {
-            //all ok, continue: there should be a module
-            }
-        else { //there is no module, select the next valid module space
-            //first, increase the lane index
-            uint8_t overflow_protection = 0;
-            while (_modules_data.numberofmodules[++_modules_data.indexLane] == 0) {
-                //watch out that there are not too many loops and the software hangs in the loop
-                if (overflow_protection++ > 20) break;
-
-                //if lane number overflows, reset to 1
-                if (_modules_data.indexLane > MAX_LANES) {
-                        _modules_data.indexLane = 1;
-                    }
-                }
-
-            //then, reset the module index to 1
-            _modules_data.indexModule = 1;
-            }
-
-/*MODULE AND LANE INDEX END*/
-
-        //Serial.println("Read Module Lane: "+String(_modules_data.indexLane)+", Module: "+String(_modules_data.indexModule));
-		for (uint8_t moduleReadRetry = _modules_data.moduleReadRetries; moduleReadRetry > 0; moduleReadRetry--){
-			bool moduleState = false;
-			moduleState = _readCellModule(_modules_data.indexLane, _modules_data.indexModule, _modules_data.modulesavailable, _modules_data.modulesnotavailable); //lane, address, <pointers>
-			moduleState &= _readCellModuleCalibration(_modules_data.indexLane, _modules_data.indexModule);	//both must be true
-			if (moduleState)	//break if read was successfull
-				break;
-			}
+    //gather all data from all cell modules first
+    for (uint8_t address = 1; address <= _modules_data.numberofmodules; address++){ 
+        _readCellModule(address, _modules_data.modulesavailable, _modules_data.modulesnotavailable); 
         }
     
     //calculating some data such as mean temperature or voltage delta or min/max values
@@ -121,51 +47,17 @@ bool Cellmodules::getDataFromModules() {
     return true;
     }
 
-bool Cellmodules::getDataFromModulesSingle(boolean fullData) {
+bool Cellmodules::getDataFromModulesSingle(void) {
     //temporary variables to count modules available. Copy it after last module into storage to read
-    static uint16_t modulesavailable = 0;
-    static uint16_t modulesnotavailable = 0;
+    static uint8_t modulesavailable;
+    static uint8_t modulesnotavailable;
 
-/*MODULE AND LANE INDEX*/
-
-    //first, increase the module index for this round
-    _modules_data.indexModule++;
-
-    //check if current indexes are valid
-    if ( (_modules_data.numberofmodules[_modules_data.indexLane] != 0) && (_modules_data.numberofmodules[_modules_data.indexLane] >= _modules_data.indexModule) ) {
-        //all ok, continue: there should be a module
-        }
-    else { //there is no module, select the next valid module space
-        //first, increase the lane index
-        uint8_t overflow_protection = 0;
-        while (_modules_data.numberofmodules[++_modules_data.indexLane] == 0) {
-            //watch out that there are not too many loops and the software hangs in the loop
-            if (overflow_protection++ > MAX_LANES) {
-                break;
-                }   
-
-            //if lane number overflows, reset to 1
-            if (_modules_data.indexLane > MAX_LANES) {
-                _modules_data.indexLane = 0;
-                }
-            }
-
-        //then, reset the module index to 1
-        _modules_data.indexModule = 1;
-        }
-
-/*MODULE AND LANE INDEX END*/
+    //if moidule index is ZERO, correct it to 1
+    if (_modules_data.moduleindex == 0)
+       _modules_data.moduleindex = 1;
 
     //reset values: cellmodule communication states if module index  is 1 (starting)
-	uint8_t first_indexLane = 1;		//find the first lane with configured modules
-	for (uint8_t lane = 1; lane <= MAX_LANES; lane++) {
-		if (_modules_data.numberofmodules[lane] > 0) {
-			first_indexLane = lane;
-			break;
-			}
-		}
-	
-    if ((_modules_data.indexLane == first_indexLane) && (_modules_data.indexModule == 1)) {
+    if (_modules_data.moduleindex == 1){
         _modules_data.modulesavailable = modulesavailable;              
         _modules_data.modulesnotavailable = modulesnotavailable;
         modulesavailable = 0;
@@ -173,19 +65,15 @@ bool Cellmodules::getDataFromModulesSingle(boolean fullData) {
         }
 
     //read one module (modulesavailable and modulesnotavailable will be updated there)
-	for (uint8_t moduleReadRetry = _modules_data.moduleReadRetries; moduleReadRetry > 0; moduleReadRetry--){
-		if (_readCellModule(_modules_data.indexLane, _modules_data.indexModule, modulesavailable, modulesnotavailable))
-			break;		//break if module read is successfull
-		//delay(500);
-		}
-    //Serial.println("Read Module Lane: "+String(_modules_data.indexLane)+", Module: "+String(_modules_data.indexModule));
+    _readCellModule(_modules_data.moduleindex, modulesavailable, modulesnotavailable); 
 
-    if (fullData) {
-        _readCellModuleCalibration(_modules_data.indexLane, _modules_data.indexModule);
-        }
-        
     //calculating some data such as mean temperature or voltage delta or min/max values
     _calculateCellStateValues();
+
+    //check if module index is too high. If yes, restart it at 1
+    _modules_data.moduleindex++;
+    if (_modules_data.moduleindex > _modules_data.numberofmodules)
+       _modules_data.moduleindex = 1;
 
     return true;
     }
@@ -193,22 +81,16 @@ bool Cellmodules::getDataFromModulesSingle(boolean fullData) {
 //set balancing current to all modules
 void Cellmodules::set_cellbalancecurrentsetpoint(float value){
     //step throug every cell module to set discharge current
-	for (uint8_t lane = 1; lane <= MAX_LANES; lane++) {
-		for (uint8_t address = 1; address <= _modules_data.numberofmodules[lane]; address++){
-			set_cellbalancecurrentsetpointsingle(lane, address, value);
-			}
-		}
+    for (uint8_t address = 1; address <= _modules_data.numberofmodules; address++){
+        set_cellbalancecurrentsetpointsingle(address, value);
+        }
     }
 
 //read single cell module
-bool Cellmodules::_readCellModule(uint8_t lane, uint8_t address, uint16_t &modulesavailable, uint16_t &modulesnotavailable) {
-    //switch lane if needed
-    if (lane != mux_getlane()) 
-        mux_setlane(constrain(lane,0,7));
-    
+bool Cellmodules::_readCellModule(uint8_t address, uint8_t &modulesavailable, uint8_t &modulesnotavailable) {
     //reset values: cell module and master error
-    _modules_data.cellerrorregister[lane][address] = 0x000000;
-    _modules_data.moduleerrorregister[lane][address] = 0x00; 
+    _modules_data.cellerrorregister[address] = 0x000000;
+    _modules_data.moduleerrorregister[address] = 0x00; 
 
     //if address is greather than maximum cell module count, return false
     if (address > MAX_CELL_MODULES)    
@@ -216,106 +98,75 @@ bool Cellmodules::_readCellModule(uint8_t lane, uint8_t address, uint16_t &modul
 
     //try to communicate with cell module. if an error occours, set all cell data to zero and continue with next module
     if (!_checkModule(address)) {
-        _modules_data.moduleonline[lane][address] = false;
-        _modules_data.cellvoltage[lane][address] = 0;                   
-        _modules_data.celltemperature[lane][address] = 0;               
-        _modules_data.cellbalanceenabled[lane][address] = false;            
-        _modules_data.cellbalancecurrent[lane][address] = 0;                           
-        _modules_data.discharge_pwm_value[lane][address] = 0;
-        _modules_data.moduleerrorregister[lane][address] |= 0b00000001;     //bit0 = no cell module available   
-        _modules_data.cellerrorregister[lane][address] = 0x00000000;   
-        _modules_data.cellerrorregister[lane][address] |= _modules_data.moduleerrorregister[lane][address] << 24;          
+        _modules_data.moduleonline[address] = false;
+        _modules_data.cellvoltage[address] = 0;                   
+        _modules_data.celltemperature[address] = 0;               
+        _modules_data.cellbalanceenabled[address] = false;            
+        _modules_data.cellbalancecurrent[address] = 0;                           
+        _modules_data.discharge_pwm_value[address] = 0;
+        _modules_data.moduleerrorregister[address] |= 0b00000001;     //bit0 = no cell module available   
+        _modules_data.cellerrorregister[address] = 0x00000000;   
+        _modules_data.cellerrorregister[address] |= _modules_data.moduleerrorregister[address] << 24;    
 
-        modulesnotavailable++; 
+        _modules_data.calibration_reference[address] = 0; 
+        _modules_data.calibration_voltage[address] = 0;           
+        _modules_data.calibration_current[address] = 0;           
+        _modules_data.calibration_temperature[address] = 0;       
+		_modules_data.calibration_current_compensation[address] = 0;  
+		_modules_data.calibration_current_missmatch_time[address] = 0;  
+		_modules_data.calibration_current_regulation_step[address] = 0;  
+		_modules_data.calibration_current_deviation[address] = 0;  
+		_modules_data.calibration_current_maximum[address] = 0;  
+        _modules_data.locate_module[address] = 0;                 
+
+        modulesnotavailable++;        
         return false;
         }
-    _modules_data.moduleonline[lane][address] = true;    
+    _modules_data.moduleonline[address] = true;    
     modulesavailable++;  
 
     //now there is no error, continue with reading some data
 
     //read the cell board address, if it is 0xFFFF there is an error
-    uint16_t moduleaddress = _readdata(lane, address, 0x02);                                                  //module i2c address
+    uint16_t moduleaddress = _readdata(address, 0x02);                                                  //module i2c address
     if (moduleaddress == 0xFFFF) {
-        _modules_data.moduleonline[lane][address] = false;
-        _modules_data.moduleerrorregister[lane][address] |= 0b00000010;     //bit1 = cell module communication error 
+        _modules_data.moduleonline[address] = false;
+        _modules_data.moduleerrorregister[address] |= 0b00000010;     //bit1 = cell module communication error 
         return false;
         }
         
     //everything looks ok read all other values from the cell modules
-    _modules_data.cellvoltage[lane][address] = _readdata(lane, address, 0x05) / 1000.0;                     //cell voltage
-    _modules_data.celltemperature[lane][address] = (_readdata(lane, address, 0x06) - 1000)/10.0;            //temperature
-    _modules_data.cellbalanceenabled[lane][address] = _readdata(lane, address, 0x0C);                       //balancing active
-    _modules_data.cellbalancecurrent[lane][address] = _readdata(lane, address, 0x0B) / 1000.0;              //current balancing current
-    //_modules_data.discharge_pwm_value[lane][address] = _readdata(lane, address, 0x0F);                      //pwm value
-    _modules_data.cellerrorregister[lane][address] = (_readdata(lane, address, 0x09) << 16) + (_readdata(lane, address, 0x08) << 8) + _readdata(lane, address, 0x07);           //errors: 0b00000000 <0x09> <0x08> <0x07>
-    _modules_data.cellerrorregister[lane][address] |= _modules_data.moduleerrorregister[lane][address] << 24;
+    _modules_data.cellvoltage[address] = _readdata(address, 0x05) / 1000.0;                     //cell voltage
+    _modules_data.celltemperature[address] = (_readdata(address, 0x06) - 1000)/10.0;            //temperature
+    _modules_data.cellbalanceenabled[address] = _readdata(address, 0x0C);                       //balancing active
+    _modules_data.cellbalancecurrent[address] = _readdata(address, 0x0B) / 1000.0;              //current balancing current
+    _modules_data.discharge_pwm_value[address] = _readdata(address, 0x0F);                      //pwm value
+    _modules_data.cellerrorregister[address] = (_readdata(address, 0x09) << 16) + (_readdata(address, 0x08) << 8) + _readdata(address, 0x07);           //errors: 0b00000000 <0x09> <0x08> <0x07>
+    _modules_data.cellerrorregister[address] |= _modules_data.moduleerrorregister[address] << 24;
+
+    _modules_data.calibration_reference[address] = _readdata(address, 0x13)/1000.0;  
+    _modules_data.calibration_voltage[address] = (_readdata(address, 0x10)-1000)/1000.0;           
+    _modules_data.calibration_current[address] = (_readdata(address, 0x11)-1000)/1000.0;           
+    _modules_data.calibration_temperature[address] = (_readdata(address, 0x12)-1000)/10.0;
+	_modules_data.calibration_current_compensation[address] = _readdata(address, 0x14);  
+	_modules_data.calibration_current_missmatch_time[address] = _readdata(address, 0x15);  
+	_modules_data.calibration_current_regulation_step[address] = _readdata(address, 0x16);  
+	_modules_data.calibration_current_deviation[address] = _readdata(address, 0x17)/1000.0;  
+	_modules_data.calibration_current_maximum[address] = _readdata(address, 0x18)/1000.0;  
+		
+    _modules_data.locate_module[address] = _readdata(address, 0x04);  
 
     //set values to cell modules
     //enable balancing
-    if (_modules_data.cellbalancestate[lane][address] != _modules_data.cellbalanceenable[lane][address]) {      //if current board state is another than requested
-        if (_modules_data.cellbalanceenable[lane][address]){
-            _writedata(lane, address, 0x0A, _modules_data.cellbalancecurrentsetpoint[lane][address]*1000.0);    //set balancing current
-            _writedata(lane, address, 0x0C, 1);                                                           //enable balancing
-            }
-        else {
-            _writedata(lane, address, 0x0C, 0);                                                           //disable balancing
-            }
-        _modules_data.cellbalancestate[lane][address] = _modules_data.cellbalanceenable[lane][address];     //set new balancing state
+    if (_modules_data.cellbalanceenable[address]){
+        _writedata(address, 0x0A, _modules_data.cellbalancecurrentsetpoint[address]*1000.0);    //set balancing current
+        _writedata(address, 0x0C, 1);                                                           //enable balancing
+        }
+    else {
+        _writedata(address, 0x0C, 0);                                                           //disable balancing
         }
 
-	//is system balancing?
-	//if (_modules_data.cellbalancecurrent[lane][address] > 0.01)
-	//	_modules_data.cellbalanceenabled[lane][address] = true;
-		
     //Serial.println("Cell Module "+String(address)+": "+String(_modules_data.cellbalancecurrentsetpoint[address]*1000.0) );
-
-    return true;
-    }
-
-
-//read single cell module
-bool Cellmodules::_readCellModuleCalibration(uint8_t lane, uint8_t address) {
-    //if address is greather than maximum cell module count, return false
-    if (address > MAX_CELL_MODULES)    
-        return false;
-
-    //try to communicate with cell module. if an error occours, set all cell data to zero and continue with next module
-    if (!_checkModule(address)) {
-        _modules_data.calibration_reference[lane][address] = 0; 
-        _modules_data.calibration_voltage[lane][address] = 0;           
-        _modules_data.calibration_current[lane][address] = 0;           
-        _modules_data.calibration_temperature[lane][address] = 0;       
-		_modules_data.calibration_current_compensation[lane][address] = 0;  
-		_modules_data.calibration_current_missmatch_time[lane][address] = 0;  
-		_modules_data.calibration_current_regulation_step[lane][address] = 0;  
-		_modules_data.calibration_current_deviation[lane][address] = 0;  
-		_modules_data.calibration_current_maximum[lane][address] = 0;  
-        _modules_data.locate_module[lane][address] = 0;                 
-
-        return false;
-        }
-
-    //read the cell board address, if it is 0xFFFF there is an error
-    uint16_t moduleaddress = _readdata(lane, address, 0x02);                                                  //module i2c address
-    if (moduleaddress == 0xFFFF) {
-        _modules_data.moduleonline[lane][address] = false;
-        _modules_data.moduleerrorregister[lane][address] |= 0b00000010;     //bit1 = cell module communication error 
-        return false;
-        }
-        
-    //everything looks ok read all other values from the cell modules
-    _modules_data.calibration_reference[lane][address] = _readdata(lane, address, 0x13)/1000.0;  
-    _modules_data.calibration_voltage[lane][address] = (_readdata(lane, address, 0x10)-1000)/1000.0;           
-    _modules_data.calibration_current[lane][address] = (_readdata(lane, address, 0x11)-1000)/1000.0;           
-    _modules_data.calibration_temperature[lane][address] = (_readdata(lane, address, 0x12)-1000)/10.0;
-	_modules_data.calibration_current_compensation[lane][address] = _readdata(lane, address, 0x14);  
-	_modules_data.calibration_current_missmatch_time[lane][address] = _readdata(lane, address, 0x15);  
-	_modules_data.calibration_current_regulation_step[lane][address] = _readdata(lane, address, 0x16);  
-	_modules_data.calibration_current_deviation[lane][address] = _readdata(lane, address, 0x17)/1000.0;  
-	_modules_data.calibration_current_maximum[lane][address] = _readdata(lane, address, 0x18)/1000.0;  
-		
-    _modules_data.locate_module[lane][address] = _readdata(lane, address, 0x04);  
 
     return true;
     }
@@ -333,70 +184,51 @@ void Cellmodules::_calculateCellStateValues(void) {
     uint8_t         highestcelltemperaturenumber = 0; 
 
     float           batteryvoltage = 0;
-    for (int i = 1; i < MAX_LANES; i++) {       //reset lane voltages
-        _modules_data.lane_voltage[i] = 0;
-        }
     float           meancelltemperature = 0;
 
     //step throug every cell voltage and temperature and compare / gather your data
-    for (uint8_t lane = 1; lane < MAX_LANES; lane++) { 
-        for (uint8_t address = 1; address <= _modules_data.numberofmodules[lane]; address++){ 
-            //if module is offline, go to the next module
-            if (!_modules_data.moduleonline[lane][address])
-                continue;
+    for (uint8_t address = 1; address <= _modules_data.numberofmodules; address++){ 
+        //if module is offline, go to the next module
+        if (!_modules_data.moduleonline[address])
+            continue;
 
-            //cell minimum voltage
-            if (_modules_data.cellvoltage[lane][address] <= lowestcellvoltage) {
-                lowestcellvoltage = _modules_data.cellvoltage[lane][address];
-                lowestcellvoltagenumber = address;
-                }
-            //cell maximum voltage
-            if (_modules_data.cellvoltage[lane][address] >= highestcellvoltage) {
-                highestcellvoltage = _modules_data.cellvoltage[lane][address];
-                highestcellvoltagenumber = address;
-                }               
-            //cell minimum temperature
-            if (_modules_data.celltemperature[lane][address] <= lowestcelltemperature) {
-                lowestcelltemperature = _modules_data.celltemperature[lane][address];
-                lowestcelltemperaturenumber = address;
-                } 
-            //cell maximum temperature
-            if (_modules_data.celltemperature[lane][address] >= highestcelltemperature) {
-                highestcelltemperature = _modules_data.celltemperature[lane][address];
-                highestcelltemperaturenumber = address;
-                }
-
-            //battery voltage per lane
-            _modules_data.lane_voltage[lane] += _modules_data.cellvoltage[lane][address];
-
-            //celltemperature
-            meancelltemperature += _modules_data.celltemperature[lane][address];
-
-            }//end address
-
-        }//end lane
-
-    //battery voltage - is battery in serial or parallel lane mode?
-    for (uint8_t lane = 1; lane < MAX_LANES; lane++) {                  //add all lanes to one single voltage
-        if (_modules_data.battery_config == ALLSERIAL) {
-            batteryvoltage += _modules_data.lane_voltage[lane];
+        //cell minimum voltage
+        if (_modules_data.cellvoltage[address] <= lowestcellvoltage) {
+            lowestcellvoltage = _modules_data.cellvoltage[address];
+            lowestcellvoltagenumber = address;
+            }
+        //cell maximum voltage
+        if (_modules_data.cellvoltage[address] >= highestcellvoltage) {
+            highestcellvoltage = _modules_data.cellvoltage[address];
+            highestcellvoltagenumber = address;
+            }               
+        //cell minimum temperature
+        if (_modules_data.celltemperature[address] <= lowestcelltemperature) {
+            lowestcelltemperature = _modules_data.celltemperature[address];
+            lowestcelltemperaturenumber = address;
+            } 
+        //cell maximum temperature
+        if (_modules_data.celltemperature[address] >= highestcelltemperature) {
+            highestcelltemperature = _modules_data.celltemperature[address];
+            highestcelltemperaturenumber = address;
             }
 
-        if (_modules_data.battery_config == PARALLEL) {                 //take the highest lane
-            if (batteryvoltage < _modules_data.lane_voltage[lane]) {
-                batteryvoltage = _modules_data.lane_voltage[lane];
-                }
-            }
+        //put data into struct (to avoid short outbreaks of values whren reading them)
+        _modules_data.lowestcellvoltage = lowestcellvoltage;
+        _modules_data.lowestcellvoltagenumber = lowestcellvoltagenumber;
+        _modules_data.highestcellvoltage = highestcellvoltage;
+        _modules_data.highestcellvoltagenumber = highestcellvoltagenumber;
+        _modules_data.lowestcelltemperature = lowestcelltemperature;
+        _modules_data.lowestcelltemperaturenumber = lowestcelltemperaturenumber;
+        _modules_data.highestcelltemperature = highestcelltemperature;
+        _modules_data.highestcelltemperaturenumber = highestcelltemperaturenumber; 
+
+        //battery voltage
+        batteryvoltage += _modules_data.cellvoltage[address];
+
+        //celltemperature
+        meancelltemperature += _modules_data.celltemperature[address];
         }
-    //put data into struct (to avoid short outbreaks of values whren reading them)
-    _modules_data.lowestcellvoltage = lowestcellvoltage;
-    _modules_data.lowestcellvoltagenumber = lowestcellvoltagenumber;
-    _modules_data.highestcellvoltage = highestcellvoltage;
-    _modules_data.highestcellvoltagenumber = highestcellvoltagenumber;
-    _modules_data.lowestcelltemperature = lowestcelltemperature;
-    _modules_data.lowestcelltemperaturenumber = lowestcelltemperaturenumber;
-    _modules_data.highestcelltemperature = highestcelltemperature;
-    _modules_data.highestcelltemperaturenumber = highestcelltemperaturenumber; 
 
     //cellsdeltavoltage
     _modules_data.batterydeltavoltage = highestcellvoltage - lowestcellvoltage;
@@ -408,8 +240,7 @@ void Cellmodules::_calculateCellStateValues(void) {
     }
 
 //check if a i2c device is available on the bus. Returns true if board is there, otherwise false.
-bool Cellmodules::_checkModule(uint8_t i2cAddress) {
-    //check module
+bool Cellmodules::_checkModule(byte i2cAddress) {
     _i2c.beginTransmission(i2cAddress);
     byte state = _i2c.endTransmission();
     if (!state) 
@@ -417,16 +248,11 @@ bool Cellmodules::_checkModule(uint8_t i2cAddress) {
     return false;
     }
 
-bool Cellmodules::_writedata(uint8_t lane, int i2cAddress, byte i2cRegister, uint16_t data) {
-    //check if address is in range 
+bool Cellmodules::_writedata(int i2cAddress, byte i2cRegister, uint16_t data) {
+    //cehck if address is in range 
     if(i2cAddress > MAX_CELL_MODULES) 
         return false;
 
-    //switch lane if needed
-    if (lane != mux_getlane()) 
-        mux_setlane(lane);
-
-    //read data
     uint16_t crc = ( i2cRegister + (data >> 8) + (data >> 0) ) % 256;
     _i2c.beginTransmission(i2cAddress);                   //queuing the slave address
     _i2c.write(i2cRegister);                              //queuing the register address/pointing regsiter
@@ -435,7 +261,7 @@ bool Cellmodules::_writedata(uint8_t lane, int i2cAddress, byte i2cRegister, uin
     _i2c.write(crc);                                      //crc checksum
     byte busStatus = _i2c.endTransmission();              //transmit all queued data and bring STOP condition on I2C Bus
     if(busStatus != 0x00) {
-        _modules_data.cellcrcerrors[lane][i2cAddress]++;          //add up cell based crc counter, that is deleted after viewing on web interface
+        _modules_data.cellcrcerrors[i2cAddress]++;          //add up cell based crc counter, that is deleted after viewing on web interface
         _modules_data.crcerrors++;                          //add up global crc error counter
         return false;
         }  
@@ -443,15 +269,11 @@ bool Cellmodules::_writedata(uint8_t lane, int i2cAddress, byte i2cRegister, uin
     }
 
 //calibration procedures
-bool Cellmodules::calibratemodule(configValue config, uint8_t lane, uint8_t address, float value){
+bool Cellmodules::calibratemodule(configValue config, uint8_t address, float value){
     //cehck if address is in range 
     if(address > MAX_CELL_MODULES) 
         return false;
 
-	//switch lane if needed    
-    if (lane != mux_getlane()) 
-        mux_setlane(lane);
-	
     //check if module is there
     if (!_checkModule(address))
         return false;
@@ -465,47 +287,47 @@ bool Cellmodules::calibratemodule(configValue config, uint8_t lane, uint8_t addr
             break;
         case REFERENCE:
             configregister = 0x13;
-            _modules_data.calibration_reference[lane][address] = value;
+            _modules_data.calibration_reference[address] = value;
             value = (int)(value*1000);              //volts to mVolts
             break;
         case VOLTAGE:
             configregister = 0x10;
-            _modules_data.calibration_voltage[lane][address] = value;
+            _modules_data.calibration_voltage[address] = value;
             value = (int)(value*1000) + 1000;       //volts to mVolts and offset of 1000mV
             break;
         case CURRENT:
             configregister = 0x11;
-            _modules_data.calibration_current[lane][address] = value;
+            _modules_data.calibration_current[address] = value;
             value = (int)(value*1000) + 1000;       //amps to mAmps and offset of 1000mA
             break;
         case TEMPERATURE:
             configregister = 0x12;
-            _modules_data.calibration_temperature[lane][address] = value;
+            _modules_data.calibration_temperature[address] = value;
             value = (int)(value*10) + 1000;       //deg to ddeg and offset of 1000ddeg
             break;
         case CURRENTCOMPENSATION:
             configregister = 0x14;
-            _modules_data.calibration_current_compensation[lane][address] = value;
+            _modules_data.calibration_current_compensation[address] = value;
             value = (int)(value);      
             break;
         case CURRENT_MISSMATCH_TIME:
             configregister = 0x15;
-            _modules_data.calibration_current_missmatch_time[lane][address] = value;
+            _modules_data.calibration_current_missmatch_time[address] = value;
             value = (int)(value);     
             break;
         case CURRENT_REGULATION_STEP:
             configregister = 0x16;
-            _modules_data.calibration_current_regulation_step[lane][address] = value;
+            _modules_data.calibration_current_regulation_step[address] = value;
             value = (int)(value); 
             break;
         case CURRENT_DEVIATION:
             configregister = 0x17;
-            _modules_data.calibration_current_deviation[lane][address] = value;
+            _modules_data.calibration_current_deviation[address] = value;
             value = (int)(value*1000);       //Volts to mV
             break;
         case CURRENT_MAX:
             configregister = 0x18;
-            _modules_data.calibration_current_maximum[lane][address] = value;
+            _modules_data.calibration_current_maximum[address] = value;
             value = (int)(value*1000);       //volts to mV
             break;
         default:
@@ -513,30 +335,26 @@ bool Cellmodules::calibratemodule(configValue config, uint8_t lane, uint8_t addr
             break; 
         }
 
-    uint16_t module_calibration = _readdata(lane, address, configregister);
+    uint16_t module_calibration = _readdata(address, configregister);
     if (module_calibration != value) {
-        _writedata(lane, address, 0x03, 1);               //enable config mode
-        _writedata(lane, address, configregister, value);
-        _writedata(lane, address, 0x03, 0);               //disable config mode
+        _writedata(address, 0x03, 1);               //enable config mode
+        _writedata(address, configregister, value);
+        _writedata(address, 0x03, 0);               //disable config mode
         }
 
     //read back config value, if not the same, return false
-    if (_readdata(lane, address, configregister) != value){
+    if (_readdata(address, configregister) != value){
         return false;
         }
 
     return true;
     }
 
-float Cellmodules::get_calibrationdata(configValue config, uint8_t lane, uint8_t address) {
+float Cellmodules::getcalibrationdata(configValue config, uint8_t address) {
     //cehck if address is in range 
     if(address > MAX_CELL_MODULES) 
         return false;
 
-	//switch lane if needed    
-    if (lane != mux_getlane()) 
-        mux_setlane(lane);
-	
     //check if module is there
     if (!_checkModule(address))
         return 0xFFFF;
@@ -547,31 +365,31 @@ float Cellmodules::get_calibrationdata(configValue config, uint8_t lane, uint8_t
             return address;
             break;
         case REFERENCE:
-            return _modules_data.calibration_reference[lane][address];
+            return _modules_data.calibration_reference[address];
             break;
         case VOLTAGE:
-            return _modules_data.calibration_voltage[lane][address];
+            return _modules_data.calibration_voltage[address];
             break;
         case CURRENT:
-            return _modules_data.calibration_current[lane][address];
+            return _modules_data.calibration_current[address];
             break;
         case TEMPERATURE:
-            return _modules_data.calibration_temperature[lane][address];
+            return _modules_data.calibration_temperature[address];
             break;
         case CURRENTCOMPENSATION:
-            return _modules_data.calibration_current_compensation[lane][address];
+            return _modules_data.calibration_current_compensation[address];
             break;
         case CURRENT_MISSMATCH_TIME:
-            return _modules_data.calibration_current_missmatch_time[lane][address];
+            return _modules_data.calibration_current_missmatch_time[address];
             break;
         case CURRENT_REGULATION_STEP:
-            return _modules_data.calibration_current_regulation_step[lane][address];
+            return _modules_data.calibration_current_regulation_step[address];
             break;
         case CURRENT_DEVIATION:
-            return _modules_data.calibration_current_deviation[lane][address];
+            return _modules_data.calibration_current_deviation[address];
             break;
         case CURRENT_MAX:
-            return _modules_data.calibration_current_maximum[lane][address];
+            return _modules_data.calibration_current_maximum[address];
             break;		
         default:
             return 0xFFFF;
@@ -581,28 +399,24 @@ float Cellmodules::get_calibrationdata(configValue config, uint8_t lane, uint8_t
     return false;
     }
 
-bool Cellmodules::set_locate(uint8_t lane, uint8_t address, bool state){
+bool Cellmodules::setLocate(uint8_t address, bool state){
     //cehck if address is in range 
     if(address > MAX_CELL_MODULES) 
         return false;
 
-    _modules_data.locate_module[lane][address] = state;
+    _modules_data.locate_module[address] = state;
 
-    _writedata(lane, address, 0x04, state);   //set locate
+    _writedata(address, 0x04, state);   //set locate
      
     //read back locate and return false if not the same
-    if(_readdata(lane, address, 0x04) != state)
+    if(_readdata(address, 0x04) != state)
         return false;
 
     //return
     return true;
     }
 
-uint16_t Cellmodules::_readdata(uint8_t lane, int i2cAddress, byte i2cRegister) {
-    //switch lane if needed
-    if (lane != mux_getlane()) 
-        mux_setlane(constrain(lane,0,7));
-
+uint16_t Cellmodules::_readdata(int i2cAddress, byte i2cRegister) {
     //first tell the module which data has to be read from it
     _i2c.beginTransmission(i2cAddress);                   //queuing the slave address
     _i2c.write(i2cRegister);                              //queuing the register address/pointing regsiter   
@@ -623,50 +437,11 @@ uint16_t Cellmodules::_readdata(uint8_t lane, int i2cAddress, byte i2cRegister) 
     if (checksum != crc){
         //SDwriteLogFile(filenameLog, "I2C communication CRC error");
         Serial.println("receiving CRC comparison failed: "+String(checksum)+" > "+crc);
-        _modules_data.cellcrcerrors[lane][i2cAddress]++;        //add up cell based crc counter, that is deleted after viewing on web interface
+        _modules_data.cellcrcerrors[i2cAddress]++;        //add up cell based crc counter, that is deleted after viewing on web interface
         _modules_data.crcerrors++;                        //add up global crc error counter
         return(0xFFFF);
         }
 
     //return the data if everything is ok
     return(data);                                         
-    }
-
-/*TCA9548A Stuff*/
-
-bool Cellmodules::mux_isready(void) {
-    if (!_checkModule(TCA_ADDRESS)) 
-        return false;
-	return true;
-	}
-
-bool Cellmodules::mux_setlane(uint8_t lane) {
-    if (!mux_isready()) 
-        return false;
-
-    uint8_t _channel = constrain( (lane-1), 0, 7);
-    _i2c.beginTransmission(TCA_ADDRESS);
-    _i2c.write(1 << _channel);
-    _i2c.endTransmission();
-	return true;
-    }
-
-uint8_t Cellmodules::mux_getlane(void) {
-    if (!mux_isready()) 
-        return 255;
-
-    byte inByte;
-    byte z = 0;
-    _i2c.requestFrom(TCA_ADDRESS, 1);
-    while (_i2c.available() == 0);
-    inByte = (_i2c.read());
-    if (inByte == 0) 
-        return 255;
-    else {
-        while (inByte > 1) {
-            inByte = (inByte >> 1);
-            z++;
-            }
-        }
-    return z+1;        
     }
